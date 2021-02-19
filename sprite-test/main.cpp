@@ -146,23 +146,7 @@ public:
 
 	virtual void wheelEvent(QWheelEvent *ev)
 	{
-		static double s_dNear = 1.0;
 
-		if (ev->delta() > 0)
-		{
-			s_dNear += 0.02;
-		}
-		else
-		{
-			s_dNear -= 0.02;
-		}
-
-		m_matrixUniform_p = glGetUniformLocation(Program, "matrix_p");
-
-		QMatrix4x4 matrix_p;
-		//matrix.perspective(60.0f, width() * 1.0f / height(), 0.1f, 100.0f);
-		matrix_p.perspective(45.0f, (float)width() / height(), s_dNear, 1000.0f);
-		glUniformMatrix4fv(m_matrixUniform_p, 1, GL_FALSE, matrix_p.data());
 	}
 
 protected:
