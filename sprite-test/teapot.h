@@ -18,11 +18,11 @@
 
 #ifndef TEAPOT_H
 #define TEAPOT_H
+#include "Geometry.h"
 
-#include <QtGui/QOpenGLFunctions_4_3_Core>
 #include "teapot_data.h"
 
-class Teapot : protected QOpenGLFunctions_4_3_Core
+class Teapot : protected Geometry
 {
 protected:
 
@@ -34,7 +34,7 @@ protected:
 
 public:
 
-	void Init()
+	void init()
 	{
 		initializeOpenGLFunctions();
 
@@ -65,11 +65,11 @@ public:
 	// The caller must bind buffer ids and set the starting offset before call this
 	// functions. (glBindBufferARB, glVertexPointer, glNormalPointer, glIndexPointer)
 	///////////////////////////////////////////////////////////////////////////////
-	void drawTeapotVBO()
+	void draw()
 	{
-		float shininess = 15.0f;
-		float diffuseColor[4] = { 0.929524f, 0.796542f, 0.178823f, 1.0f };
-		float specularColor[4] = { 1.00000f, 0.980392f, 0.549020f, 1.0f };
+// 		float shininess = 15.0f;
+// 		float diffuseColor[4] = { 0.929524f, 0.796542f, 0.178823f, 1.0f };
+// 		float specularColor[4] = { 1.00000f, 0.980392f, 0.549020f, 1.0f };
 
 		// set color using glMaterial (gold-yellow)
 		//glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess); // range 0 ~ 128

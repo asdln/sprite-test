@@ -59,6 +59,7 @@
 #include <QtCore/qmath.h>
 #include <QtGui/QOpenGLFunctions>
 #include "teapot.h"
+#include "Plane.h"
 #include "funcs.h"
 
 
@@ -87,20 +88,25 @@ public:
 
 	virtual void resizeEvent(QResizeEvent * event)
 	{
-		if(isInitialized())
+		if (isInitialized())
+		{
+			QMatrix4x4 matrix_p;
+			matrix_p.perspective(45.0f, (float)width() / height(), 1.0f, 1000.0f);
+			glUniformMatrix4fv(m_matrixUniform_p, 1, GL_FALSE, matrix_p.data());
 			glViewport(0, 0, width(), height());
+		}
 	}
 
 	virtual void mouseMoveEvent(QMouseEvent *ev)
 	{
+		x0_ = x1_;
+		y0_ = y1_;
+
+		x1_ = getXnormalized(ev->pos().x(), 0, width() - 1);
+		y1_ = getYnormalized(ev->pos().y(), 0, height() - 1);
+
 		if (ev->buttons() & Qt::LeftButton)
 		{
-			x0_ = x1_;
-			y0_ = y1_;
-
-			x1_ = getXnormalized(ev->pos().x(), 0, width() - 1);
-			y1_ = getYnormalized(ev->pos().y(), 0, height() - 1);
-
 			float z0 = tb_project_to_sphere(r_, x0_, y0_);
 			float z1 = tb_project_to_sphere(r_, x1_, y1_);
 
@@ -111,11 +117,19 @@ public:
 			v1.normalize();
 
 			QQuaternion quat_rotate = QQuaternion::rotationTo(v0, v1);
-			QMatrix4x4 mat;
-			mat.rotate(quat_rotate);
+// 			QMatrix4x4 mat;
+// 			mat.rotate(quat_rotate);
 
-			tempMatrix_ = mat * tempMatrix_;
+			rotate_ = quat_rotate * rotate_;
+
+			//tempMatrix_ = mat * tempMatrix_;
 			//tempMatrix_ = tempMatrix_ * mat;
+
+			requestUpdate();
+		}
+		else if (ev->buttons() & Qt::MiddleButton)
+		{
+			//center_ += QVector3D(x1_ - x0_, y1_ - y0_, 0.0);
 		}
 	}
 
@@ -141,17 +155,35 @@ public:
 
 	virtual void keyPressEvent(QKeyEvent *ev)
 	{
-		tempMatrix_.setToIdentity();
+		rotate_ = QQuaternion();
+		distance_ = -10.0;
 	}
 
 	virtual void wheelEvent(QWheelEvent *ev)
 	{
+		if (ev->delta() > 0)
+		{
+			//center_.setZ(center_.z() + 1.0);
+			distance_ += 1.0;
+		}
+		else
+		{
+			//center_.setZ(center_.z() - 1.0);
+			distance_ -= 1.0;
+		}
 
+		requestUpdate();
 	}
 
 protected:
 
-	QMatrix4x4 tempMatrix_;
+	//QMatrix4x4 tempMatrix_;
+
+	QQuaternion rotate_;
+
+	//QVector3D center_ = QVector3D(0, 0, -10);
+
+	float distance_ = -10.0;
 
 	float x0_;
 	float y0_;
@@ -178,6 +210,8 @@ private:
     int m_frame;
 
 	Teapot* teapot = new Teapot;
+
+	Plane* plane_ = new Plane();
 };
 
 TriangleWindow::TriangleWindow()
@@ -191,7 +225,8 @@ void TriangleWindow::initialize()
 	ShaderInfo si[] = { { GL_VERTEX_SHADER, "PointSprite.vert" },{ GL_FRAGMENT_SHADER, "PointSprite.frag" },{ GL_NONE, NULL } };
 	Program = LoadShaders(si);
 
-	teapot->Init();
+	teapot->init();
+	plane_->init();
 
 // 	glGenVertexArrays(1, &vert);
 // 	glBindVertexArray(vert);
@@ -229,7 +264,7 @@ void TriangleWindow::initialize()
 	//glEnable(GL_POINT_SPRITE);
 	//glEnable(GL_PROGRAM_POINT_SIZE);
 
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	
 	//glShadeModel(GL_SMOOTH);
@@ -243,7 +278,6 @@ void TriangleWindow::initialize()
 	m_matrixUniform_p = glGetUniformLocation(Program, "matrix_p");
 
 	QMatrix4x4 matrix_p;
-	//matrix.perspective(60.0f, width() * 1.0f / height(), 0.1f, 100.0f);
 	matrix_p.perspective(45.0f, (float)width() / height(), 1.0f, 1000.0f);
 	glUniformMatrix4fv(m_matrixUniform_p, 1, GL_FALSE, matrix_p.data());
 
@@ -261,7 +295,7 @@ void TriangleWindow::initialize()
 	HalfVector.normalize();
 
 	glUniform3fv(glGetUniformLocation(Program, "HalfVector"), 1, (const GLfloat*)&HalfVector);
-	glUniform1f(glGetUniformLocation(Program, "Shininess"), 8.0f);
+	glUniform1f(glGetUniformLocation(Program, "Shininess"), 5.0f);
 	glUniform1f(glGetUniformLocation(Program, "Strength"), 0.9f);
 
 
@@ -282,15 +316,18 @@ void TriangleWindow::render()
 // 	matrix_mv.translate(0, -1.57f, 0);
 
 	QMatrix4x4 matrix1;
-	matrix1.translate(0, 0, -10);
+	matrix1.translate(0, 0, distance_);
 
 	//matrix_mv = matrix_mv * tempMatrix_;
+
+	QMatrix4x4 mat_rotate;
+	mat_rotate.rotate(rotate_);
 
 	QMatrix4x4 matrix2;
 	matrix2.translate(0, -1.57f, 0);
 
 	QMatrix4x4 matrix_mv;
-	matrix_mv = matrix1 * tempMatrix_ * matrix2;
+	matrix_mv = matrix1 * mat_rotate * matrix2;
 
 	glUseProgram(Program);
 
@@ -298,7 +335,8 @@ void TriangleWindow::render()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	teapot->drawTeapotVBO();
+	teapot->draw();
+	plane_->draw();
 
 	//glBindVertexArray(vert);
 	//glUniform1i(0, 0);
@@ -340,7 +378,7 @@ int main(int argc, char **argv)
 	window.resize(640, 480);
 	window.show();
 
-	window.setAnimating(true);
+	//window.setAnimating(true);
 
 	return app.exec();
 }
