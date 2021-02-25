@@ -60,21 +60,10 @@
 #include <QtGui/QOpenGLFunctions>
 #include "teapot.h"
 #include "Plane.h"
+#include "Cube.h"
 #include "funcs.h"
-
-
-#define BUFFER_OFFSET(x)  ((const void*) (x))
-
-struct Vertex
-{
-	GLfloat position[3];
-};
-
-Vertex Verts[] = {
-	{ { -0.8f,-0.4f,0.0f }},
-	{ { 0.8f,-0.4f,0.0f }},
-	{ { -0.8f,0.4f,0.0f }},
-	{ { 0.8f,0.4f,0.0f }} };
+#include "Triangle.h"
+#include "Pyramid.h"
 
 
 //! [1]
@@ -82,6 +71,7 @@ class TriangleWindow : public OpenGLWindow
 {
 public:
     TriangleWindow();
+	~TriangleWindow();
 
     void initialize() override;
     void render() override;
@@ -161,7 +151,7 @@ public:
 
 	virtual void wheelEvent(QWheelEvent *ev)
 	{
-		if (ev->delta() > 0)
+		if (ev->delta() < 0)
 		{
 			//center_.setZ(center_.z() + 1.0);
 			distance_ += 1.0;
@@ -210,13 +200,34 @@ private:
     int m_frame;
 
 	Teapot* teapot = new Teapot;
+	Teapot* teapot2_ = new Teapot;
 
-	Plane* plane_ = new Plane();
+	Plane* plane_ = new Plane;
+
+	Cube* cube1_ = new Cube;
+	Cube* cube2_ = new Cube;
+
+	Triangle* triangle_ = new Triangle;
+
+	Pyramid* pyramid_ = new Pyramid;
+	Pyramid* pyramid2_ = new Pyramid;
 };
 
 TriangleWindow::TriangleWindow()
     : m_frame(0)
 {
+}
+
+TriangleWindow::~TriangleWindow()
+{
+	delete teapot;
+	delete teapot2_;
+	delete plane_;
+	delete cube1_;
+	delete cube2_;
+	delete triangle_;
+	delete pyramid_;
+	delete pyramid2_;
 }
 
 //! [4]
@@ -225,25 +236,45 @@ void TriangleWindow::initialize()
 	ShaderInfo si[] = { { GL_VERTEX_SHADER, "PointSprite.vert" },{ GL_FRAGMENT_SHADER, "PointSprite.frag" },{ GL_NONE, NULL } };
 	Program = LoadShaders(si);
 
+	cube1_->translate(2, 1, 2);
+	cube1_->rotate(45, 1, 1, 1);
+
+	cube2_->translate(-2, 1.5, -2);
+	cube2_->scale(1, 3, 1);
+
+	teapot->scale(0.5, 0.5, 0.5);
+	plane_->scale(12, 0, 12);
+
+	teapot2_->translate(2, 1, -4);
+	teapot2_->rotate(90, 1, 1, 1);
+	teapot2_->scale(0.5, 0.5, 0.5);
+
+	triangle_->translate(3, 0, -2);
+	triangle_->scale(1, 2, 1);
+
+	pyramid_->translate(0, 3, 0);
+	pyramid_->rotate(90, 1, 0, 0);
+	pyramid_->scale(1, 4, 1);
+
+	pyramid2_->translate(-2, 0, 2);
+	pyramid2_->scale(1, 2, 1);
+
 	teapot->init();
+	teapot2_->init();
 	plane_->init();
 
-// 	glGenVertexArrays(1, &vert);
-// 	glBindVertexArray(vert);
-// 
-// 	glGenBuffers(1, &vbo);
-// 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-// 	glBufferData(GL_ARRAY_BUFFER, sizeof(Verts), Verts, GL_STATIC_DRAW);
-// 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 /*3*/, BUFFER_OFFSET(0));
-// 	glEnableVertexAttribArray(0);
-// 	//     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), BUFFER_OFFSET(sizeof(Verts->position)));
-// 	//     glEnableVertexAttribArray(1);
-// 	glBindVertexArray(0);
+	cube1_->init();
+	cube2_->init();
+
+	triangle_->init();
+	pyramid_->init();
+	pyramid2_->init();
 
 	float texData[] = { 1.0, 0.0, 0.0, 1.0,
 						0.0, 1.0, 0.0, 1.0,
 						0.0, 0.0, 1.0, 1.0,
 						1.0, 1.0 ,0.0, 1.0 };
+
 	GLuint PiexlUnpack;
 	glGenBuffers(1, &PiexlUnpack);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, PiexlUnpack);
@@ -298,7 +329,6 @@ void TriangleWindow::initialize()
 	glUniform1f(glGetUniformLocation(Program, "Shininess"), 5.0f);
 	glUniform1f(glGetUniformLocation(Program, "Strength"), 0.9f);
 
-
 	glViewport(0, 0, width(), height());
 }
 //! [4]
@@ -323,11 +353,11 @@ void TriangleWindow::render()
 	QMatrix4x4 mat_rotate;
 	mat_rotate.rotate(rotate_);
 
-	QMatrix4x4 matrix2;
-	matrix2.translate(0, -1.57f, 0);
+// 	QMatrix4x4 matrix2;
+// 	matrix2.translate(0, -1.57f, 0);
 
 	QMatrix4x4 matrix_mv;
-	matrix_mv = matrix1 * mat_rotate * matrix2;
+	matrix_mv = matrix1 * mat_rotate /** matrix2*/;
 
 	glUseProgram(Program);
 
@@ -336,7 +366,13 @@ void TriangleWindow::render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	teapot->draw();
+	teapot2_->draw();
 	plane_->draw();
+	cube1_->draw();
+	cube2_->draw();
+	triangle_->draw();
+	pyramid_->draw();
+	pyramid2_->draw();
 
 	//glBindVertexArray(vert);
 	//glUniform1i(0, 0);
