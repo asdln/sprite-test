@@ -5,6 +5,14 @@ Plane::Plane()
 	float size = 1.0;
 	float updown_offset = 0.0;
 
+	normal_count_ = 12;
+	vertice_count_ = 12;
+	indice_count_ = 4;
+
+	vertices_ = new GLfloat[vertice_count_];
+	normals_ = new GLfloat[normal_count_];
+	indices_ = new GLushort[indice_count_];
+
 	vertices_[0] = size * 0.5;
 	vertices_[1] = updown_offset;
 	vertices_[2] = size * 0.5;
@@ -45,30 +53,9 @@ Plane::Plane()
 	primitives_.emplace_back(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_SHORT, 0);
 }
 
-void Plane::init()
+Plane::~Plane()
 {
-	calculate3size(normals_, sizeof(normals_), vertices_, sizeof(vertices_));
-
-	initializeOpenGLFunctions();
-
-	glGenVertexArrays(1, &vert);
-	glBindVertexArray(vert);
-
-	glGenBuffers(1, &vbo_vertex);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertex);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_), vertices_, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 /*3*/, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glGenBuffers(1, &vbo_normal);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_normal);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(normals_), normals_, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-
-	glGenBuffers(1, &ebo);                           // create a vbo
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);                       // activate vbo id to use
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_), indices_, GL_STATIC_DRAW);    // upload data to video card
-
-	glBindVertexArray(0);
+	delete vertices_;
+	delete normals_;
+	delete indices_;
 }

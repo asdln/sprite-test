@@ -47,7 +47,7 @@ class Geometry : protected QOpenGLFunctions_4_3_Core
 {
 public:
 
-	virtual void init() {}
+	virtual void init();
 
 	virtual void draw();
 
@@ -61,6 +61,8 @@ public:
 
 	void scale(float x, float y, float z){ matrix_.scale(x, y, z); }
 
+	int line_intersect(float* p0, float* p1);
+
 protected:
 
 	std::vector<Primitive> primitives_;
@@ -72,5 +74,13 @@ protected:
 	GLuint vbo_normal;
 
 	GLuint ebo;
+
+	GLfloat* vertices_ = nullptr;
+	GLfloat* normals_ = nullptr;
+	GLushort* indices_ = nullptr;
+
+	size_t vertice_count_;
+	size_t normal_count_;
+	size_t indice_count_;
 };
 

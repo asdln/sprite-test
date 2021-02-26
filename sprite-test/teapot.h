@@ -27,15 +27,6 @@ public:
 	Teapot();
 
 	~Teapot();
-
-	void init();
-
-protected:
-
-	GLfloat* vertices_ = nullptr;
-	GLfloat* normals_ = nullptr;
-	GLushort* indices_ = nullptr;
-
 };
 
 

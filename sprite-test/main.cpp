@@ -64,6 +64,7 @@
 #include "funcs.h"
 #include "Triangle.h"
 #include "Pyramid.h"
+#include "LineSegment.h"
 
 
 //! [1]
@@ -83,6 +84,7 @@ public:
 			QMatrix4x4 matrix_p;
 			matrix_p.perspective(45.0f, (float)width() / height(), 1.0f, 1000.0f);
 			glUniformMatrix4fv(m_matrixUniform_p, 1, GL_FALSE, matrix_p.data());
+			matrix_p_ = matrix_p;
 			glViewport(0, 0, width(), height());
 		}
 	}
@@ -133,6 +135,34 @@ public:
 			x1_ = getXnormalized(ev->pos().x(), 0, width() - 1);
 			y1_ = getYnormalized(ev->pos().y(), 0, height() - 1);
 		}
+		else if (ev->buttons() & Qt::RightButton)
+		{
+			float x = getXnormalized(ev->pos().x(), 0, width() - 1);
+			float y = getYnormalized(ev->pos().y(), 0, height() - 1);
+
+			QVector4D p1(x, y, 1.0, 1.0);
+			QVector4D p2(x, y, -1.0, 1.0);
+
+			QVector4D vec1 = matrix_mv_.inverted() * matrix_p_.inverted() * p1;
+			QVector4D vec2 = matrix_mv_.inverted() * matrix_p_.inverted() * p2;
+
+			QVector3D a;
+			QVector3D b;
+
+			a.setX(vec1.x() / vec1.w());
+			a.setY(vec1.y() / vec1.w());
+			a.setZ(vec1.z() / vec1.w());
+
+			b.setX(vec2.x() / vec2.w());
+			b.setY(vec2.y() / vec2.w());
+			b.setZ(vec2.z() / vec2.w());
+
+			triangle_->line_intersect((float*)&a, (float*)&b);
+
+			LineSegment* testLine_ = new LineSegment(a, b);
+			pick_lines_.push_back(testLine_);
+			testLine_->init();
+		}
 	}
 
 	virtual void mouseReleaseEvent(QMouseEvent *ev)
@@ -141,6 +171,8 @@ public:
 		{
 
 		}
+
+		requestUpdate();
 	}
 
 	virtual void keyPressEvent(QKeyEvent *ev)
@@ -197,6 +229,9 @@ private:
 	GLuint m_matrixUniform_mv;
 	GLuint m_matrixUniform_p;
 
+	QMatrix4x4 matrix_mv_;
+	QMatrix4x4 matrix_p_;
+
     int m_frame;
 
 	Teapot* teapot = new Teapot;
@@ -211,6 +246,10 @@ private:
 
 	Pyramid* pyramid_ = new Pyramid;
 	Pyramid* pyramid2_ = new Pyramid;
+
+	LineSegment* line_ = new LineSegment(QVector3D(0, 0, 0), QVector3D(10.0, 10.0, 10.0));
+
+	std::vector<LineSegment*> pick_lines_;
 };
 
 TriangleWindow::TriangleWindow()
@@ -270,6 +309,8 @@ void TriangleWindow::initialize()
 	pyramid_->init();
 	pyramid2_->init();
 
+	line_->init();
+
 	float texData[] = { 1.0, 0.0, 0.0, 1.0,
 						0.0, 1.0, 0.0, 1.0,
 						0.0, 0.0, 1.0, 1.0,
@@ -311,6 +352,7 @@ void TriangleWindow::initialize()
 	QMatrix4x4 matrix_p;
 	matrix_p.perspective(45.0f, (float)width() / height(), 1.0f, 1000.0f);
 	glUniformMatrix4fv(m_matrixUniform_p, 1, GL_FALSE, matrix_p.data());
+	matrix_p_ = matrix_p;
 
 	QVector4D Ambient = QVector4D(0.2f, 0.2f, 0.2f, 1.0f);
 	glUniform4fv(glGetUniformLocation(Program, "Ambient"), 1, (const GLfloat*)&Ambient);
@@ -362,6 +404,7 @@ void TriangleWindow::render()
 	glUseProgram(Program);
 
 	glUniformMatrix4fv(m_matrixUniform_mv, 1, GL_FALSE, matrix_mv.data());
+	matrix_mv_ = matrix_mv;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -373,6 +416,12 @@ void TriangleWindow::render()
 	triangle_->draw();
 	pyramid_->draw();
 	pyramid2_->draw();
+	line_->draw();
+
+	for (auto line : pick_lines_)
+	{
+		line->draw();
+	}
 
 	//glBindVertexArray(vert);
 	//glUniform1i(0, 0);
@@ -382,14 +431,16 @@ void TriangleWindow::render()
 	
 	//glDrawArrays(GL_POINTS, 0, 4);
 
+	//glUseProgram(0);
+
     ++m_frame;
 }
 //! [5]
 
-float calczn(float ze, float f, float n)
-{
-	return ((f + n) / (f - n) * ze + 2.0 * f * n / (f - n)) / ze;
-}
+// float calczn(float ze, float f, float n)
+// {
+// 	return ((f + n) / (f - n) * ze + 2.0 * f * n / (f - n)) / ze;
+// }
 
 //! [2]
 int main(int argc, char **argv)
@@ -397,13 +448,13 @@ int main(int argc, char **argv)
 	QGuiApplication app(argc, argv);
 
 	QSurfaceFormat format;
-	//format.setSamples(16);
+	format.setSamples(16);
 
-	float zn_min = calczn(-2.8, 100.0, 0.1);
-	float zn_max = calczn(-1.2, 100.0, 0.1);
-
-	float zn_min2 = calczn(-2.8, 2.0, 0.1);
-	float zn_max2 = calczn(-1.2, 2.0, 0.1);
+// 	float zn_min = calczn(-2.8, 100.0, 0.1);
+// 	float zn_max = calczn(-1.2, 100.0, 0.1);
+// 
+// 	float zn_min2 = calczn(-2.8, 2.0, 0.1);
+// 	float zn_max2 = calczn(-1.2, 2.0, 0.1);
 
 
 	//QSurfaceFormat::SwapBehavior swr = format.swapBehavior();

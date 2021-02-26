@@ -6,4 +6,4 @@ float getXnormalized(double x, double minx, double maxx);
 
 float getYnormalized(double y, double miny, double maxy);
 
-int linesegment_triangle_intersect(float* p0, float* p1, float* v0, float* v1, float* v2);
+int line_triangle_intersect(float* p0, float* p1, float* v0, float* v1, float* v2);

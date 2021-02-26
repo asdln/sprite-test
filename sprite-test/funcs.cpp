@@ -45,7 +45,7 @@ float sideOp(float* a, float*b)
 	return res;
 }
 
-int linesegment_triangle_intersect(float* p0, float* p1, float* v0, float* v1, float* v2)
+int line_triangle_intersect(float* p0, float* p1, float* v0, float* v1, float* v2)
 {
 	float e1[6];
 	float e2[6];
