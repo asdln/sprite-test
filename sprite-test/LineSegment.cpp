@@ -32,7 +32,7 @@ LineSegment::LineSegment()
 	primitives_.emplace_back(GL_LINES, 2, GL_UNSIGNED_SHORT, 0);
 }
 
-LineSegment::LineSegment(QVector3D p1, QVector3D p2)
+LineSegment::LineSegment(QVector3D p1, QVector3D p2) 
 {
 	normal_count_ = 6;
 	vertice_count_ = 6;

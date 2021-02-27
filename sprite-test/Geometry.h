@@ -43,9 +43,13 @@ struct Primitive
 	}
 };
 
-class Geometry : protected QOpenGLFunctions_4_3_Core
+class Geometry : public QOpenGLFunctions_4_3_Core
 {
 public:
+
+	Geometry();
+
+	~Geometry();
 
 	virtual void init();
 
@@ -69,11 +73,11 @@ protected:
 
 	QMatrix4x4 matrix_;
 
-	GLuint vert;
-	GLuint vbo_vertex;
-	GLuint vbo_normal;
+	GLuint vert = 0;
+	GLuint vbo_vertex = 0;
+	GLuint vbo_normal = 0;
 
-	GLuint ebo;
+	GLuint ebo = 0;
 
 	GLfloat* vertices_ = nullptr;
 	GLfloat* normals_ = nullptr;
@@ -82,5 +86,6 @@ protected:
 	size_t vertice_count_;
 	size_t normal_count_;
 	size_t indice_count_;
+
 };
 

@@ -1,6 +1,37 @@
 #include "Geometry.h"
 #include "funcs.h"
 
+Geometry::Geometry()
+{
+}
+
+Geometry::~Geometry()
+{
+	if (vert)
+	{
+		glBindVertexArray(0);
+		glDeleteVertexArrays(1, &vert);
+	}
+
+	if (vbo_vertex)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDeleteBuffers(1, &vbo_vertex);
+	}
+
+	if (vbo_normal)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDeleteBuffers(1, &vbo_normal);
+	}
+
+	if (ebo)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glDeleteBuffers(1, &ebo);
+	}
+}
+
 void Geometry::init()
 {
 	calculate3size(normals_, normal_count_, vertices_, vertice_count_);

@@ -157,11 +157,14 @@ public:
 			b.setY(vec2.y() / vec2.w());
 			b.setZ(vec2.z() / vec2.w());
 
-			triangle_->line_intersect((float*)&a, (float*)&b);
+			for (auto shape : shapes_)
+			{
+				shape->line_intersect((float*)&a, (float*)&b);
+			}
 
-			LineSegment* testLine_ = new LineSegment(a, b);
-			pick_lines_.push_back(testLine_);
-			testLine_->init();
+			auto pick_line = std::make_shared<LineSegment>(a, b);
+			pick_lines_.push_back(pick_line);
+			pick_line->init();
 		}
 	}
 
@@ -179,6 +182,9 @@ public:
 	{
 		rotate_ = QQuaternion();
 		distance_ = -10.0;
+		pick_lines_.clear();
+
+		requestUpdate();
 	}
 
 	virtual void wheelEvent(QWheelEvent *ev)
@@ -234,22 +240,8 @@ private:
 
     int m_frame;
 
-	Teapot* teapot = new Teapot;
-	Teapot* teapot2_ = new Teapot;
-
-	Plane* plane_ = new Plane;
-
-	Cube* cube1_ = new Cube;
-	Cube* cube2_ = new Cube;
-
-	Triangle* triangle_ = new Triangle;
-
-	Pyramid* pyramid_ = new Pyramid;
-	Pyramid* pyramid2_ = new Pyramid;
-
-	LineSegment* line_ = new LineSegment(QVector3D(0, 0, 0), QVector3D(10.0, 10.0, 10.0));
-
-	std::vector<LineSegment*> pick_lines_;
+	std::vector<std::shared_ptr<Geometry>> shapes_;
+	std::vector<std::shared_ptr<LineSegment>> pick_lines_;
 };
 
 TriangleWindow::TriangleWindow()
@@ -259,19 +251,36 @@ TriangleWindow::TriangleWindow()
 
 TriangleWindow::~TriangleWindow()
 {
-	delete teapot;
-	delete teapot2_;
-	delete plane_;
-	delete cube1_;
-	delete cube2_;
-	delete triangle_;
-	delete pyramid_;
-	delete pyramid2_;
+
 }
 
 //! [4]
 void TriangleWindow::initialize()
 {
+	auto teapot = std::make_shared<Teapot>();
+	shapes_.emplace_back(teapot);
+	auto teapot2_ = std::make_shared<Teapot>();
+	shapes_.emplace_back(teapot2_);
+
+	auto plane_ = std::make_shared<Plane>();
+	shapes_.emplace_back(plane_);
+
+	auto cube1_ = std::make_shared<Cube>();
+	shapes_.emplace_back(cube1_);
+	auto cube2_ = std::make_shared<Cube>();
+	shapes_.emplace_back(cube2_);
+
+	auto triangle_ = std::make_shared<Triangle>();
+	shapes_.emplace_back(triangle_);
+
+	auto pyramid_ = std::make_shared<Pyramid>();
+	shapes_.emplace_back(pyramid_);
+	auto pyramid2_ = std::make_shared<Pyramid>();
+	shapes_.emplace_back(pyramid2_);
+
+	auto line_ = std::make_shared<LineSegment>(QVector3D(0, 0, 0), QVector3D(10.0, 10.0, 10.0));
+	shapes_.emplace_back(line_);
+
 	ShaderInfo si[] = { { GL_VERTEX_SHADER, "PointSprite.vert" },{ GL_FRAGMENT_SHADER, "PointSprite.frag" },{ GL_NONE, NULL } };
 	Program = LoadShaders(si);
 
@@ -298,18 +307,10 @@ void TriangleWindow::initialize()
 	pyramid2_->translate(-2, 0, 2);
 	pyramid2_->scale(1, 2, 1);
 
-	teapot->init();
-	teapot2_->init();
-	plane_->init();
-
-	cube1_->init();
-	cube2_->init();
-
-	triangle_->init();
-	pyramid_->init();
-	pyramid2_->init();
-
-	line_->init();
+	for (auto shape : shapes_)
+	{
+		shape->init();
+	}
 
 	float texData[] = { 1.0, 0.0, 0.0, 1.0,
 						0.0, 1.0, 0.0, 1.0,
@@ -408,15 +409,10 @@ void TriangleWindow::render()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	teapot->draw();
-	teapot2_->draw();
-	plane_->draw();
-	cube1_->draw();
-	cube2_->draw();
-	triangle_->draw();
-	pyramid_->draw();
-	pyramid2_->draw();
-	line_->draw();
+	for (auto shape : shapes_)
+	{
+		shape->draw();
+	}
 
 	for (auto line : pick_lines_)
 	{
