@@ -18,9 +18,9 @@
 
 #ifndef TEAPOT_H
 #define TEAPOT_H
-#include "Geometry.h"
+#include "PrimitiveSet.h"
 
-class Teapot : public Geometry
+class Teapot : public PrimitiveSet
 {
 public:
 

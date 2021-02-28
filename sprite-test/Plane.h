@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Geometry.h"
+#include "PrimitiveSet.h"
 
 
-class Plane : public Geometry
+class Plane : public PrimitiveSet
 {
 public:
 

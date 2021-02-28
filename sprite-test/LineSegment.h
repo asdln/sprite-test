@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Geometry.h"
-class LineSegment : public Geometry
+#include "PrimitiveSet.h"
+class LineSegment : public PrimitiveSet
 {
 public:
 
-	LineSegment();
 	LineSegment(QVector3D p1, QVector3D p2);
 	~LineSegment();
 

@@ -1,24 +1,14 @@
 #pragma once
 
-#include "Plane.h"
+#include "PrimitiveSetCollection.h"
 #include <QtGui/qmatrix4x4.h>
 
-class Cube : public Geometry
+class Cube : public PrimitiveSetCollection
 {
 
 public:
 
 	void init();
 
-	void draw();
-
-protected:
-
-	Plane l;
-	Plane r;
-	Plane t;
-	Plane b;
-	Plane front;
-	Plane back;
 };
 

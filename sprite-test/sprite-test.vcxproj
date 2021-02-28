@@ -18,6 +18,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="openglwindow.cpp" />
     <ClCompile Include="Plane.cpp" />
+    <ClCompile Include="PrimitiveSet.cpp" />
+    <ClCompile Include="PrimitiveSetCollection.cpp" />
     <ClCompile Include="Pyramid.cpp" />
     <ClCompile Include="teapot.cpp" />
     <ClCompile Include="Triangle.cpp" />
@@ -35,6 +37,8 @@
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="LineSegment.h" />
     <ClInclude Include="Plane.h" />
+    <ClInclude Include="PrimitiveSet.h" />
+    <ClInclude Include="PrimitiveSetCollection.h" />
     <ClInclude Include="Pyramid.h" />
     <ClInclude Include="teapot.h" />
     <ClInclude Include="teapot_data.h" />

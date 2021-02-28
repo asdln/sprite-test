@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Geometry.h"
-class Triangle : public Geometry
+#include "PrimitiveSet.h"
+class Triangle : public PrimitiveSet
 {
 public:
 

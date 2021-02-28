@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Geometry.h"
-#include "Triangle.h"
-#include "Plane.h"
+#include "PrimitiveSetCollection.h"
 
-class Pyramid : public Geometry
+class Pyramid : public PrimitiveSetCollection
 {
 public:
 
@@ -12,15 +10,9 @@ public:
 
 	void init();
 
-	void draw();
 
 protected:
 
-	Triangle l;
-	Triangle r;
-	Triangle f;
-	Triangle b;
 
-	Plane p;
 };
 

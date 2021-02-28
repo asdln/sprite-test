@@ -1,63 +1,25 @@
 #include "Geometry.h"
-#include "funcs.h"
 
-Geometry::Geometry()
+inline QVector3D operator*(const QMatrix3x3& m, const QVector3D& v)
 {
+	QVector3D res;
+
+	res.setX(m(0, 0) * v.x() + m(0, 1) * v.y() + m(0, 2) * v.z());
+	res.setY(m(1, 0) * v.x() + m(1, 1) * v.y() + m(1, 2) * v.z());
+	res.setZ(m(2, 0) * v.x() + m(2, 1) * v.y() + m(2, 2) * v.z());
+
+	return res;
 }
 
-Geometry::~Geometry()
+inline void operator*(const QMatrix3x3& m, GLfloat* v)
 {
-	if (vert)
-	{
-		glBindVertexArray(0);
-		glDeleteVertexArrays(1, &vert);
-	}
+	float x = v[0];
+	float y = v[1];
+	float z = v[2];
 
-	if (vbo_vertex)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDeleteBuffers(1, &vbo_vertex);
-	}
-
-	if (vbo_normal)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDeleteBuffers(1, &vbo_normal);
-	}
-
-	if (ebo)
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glDeleteBuffers(1, &ebo);
-	}
-}
-
-void Geometry::init()
-{
-	calculate3size(normals_, normal_count_, vertices_, vertice_count_);
-
-	initializeOpenGLFunctions();
-
-	glGenVertexArrays(1, &vert);
-	glBindVertexArray(vert);
-
-	glGenBuffers(1, &vbo_vertex);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertex);
-	glBufferData(GL_ARRAY_BUFFER, vertice_count_ * sizeof(GLfloat), vertices_, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 /*3*/, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glGenBuffers(1, &vbo_normal);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_normal);
-	glBufferData(GL_ARRAY_BUFFER, normal_count_ * sizeof(GLfloat), normals_, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-
-	glGenBuffers(1, &ebo);                           // create a vbo
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);                       // activate vbo id to use
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indice_count_ * sizeof(GLfloat), indices_, GL_STATIC_DRAW);    // upload data to video card
-
-	glBindVertexArray(0);
+	v[0] = m(0, 0) * x + m(0, 1) * y + m(0, 2) * z;
+	v[1] = m(1, 0) * x + m(1, 1) * y + m(1, 2) * z;
+	v[2] = m(2, 0) * x + m(2, 1) * y + m(2, 2) * z;
 }
 
 void Geometry::calculate3size(GLfloat* normals, int normals_size, GLfloat* vertices, int vertices_size)
@@ -81,50 +43,4 @@ void Geometry::calculate3size(GLfloat* normals, int normals_size, GLfloat* verti
 			vertices[i * 3 + 2] = vec.z();
 		}
 	}
-}
-
-void Geometry::draw()
-{
-	glBindVertexArray(vert);
-
-	for (auto primitive : primitives_)
-	{
-		glDrawElements(primitive.mode, primitive.count, primitive.type, (GLushort*)0 + primitive.offset);
-	}
-}
-
-int Geometry::line_intersect(float* p0, float* p1)
-{
-	for (const auto& primitive : primitives_)
-	{
-		switch (primitive.mode)
-		{
-		case GL_TRIANGLES:
-		{
-			size_t start_indice = primitive.offset / sizeof(GLushort);
-			for (int i = 0; i < primitive.count / 3; i++)
-			{
-				int res = line_triangle_intersect(p0, p1, vertices_ + indices_[start_indice + i * 3] * 3, vertices_ + indices_[start_indice + i * 3 + 1] * 3, vertices_ + indices_[start_indice + i * 3 + 2] * 3);
-				if (res >= 0)
-				{
-					printf("tested \n");
-
-				}
-			}
-			
-		}
-		case GL_TRIANGLE_FAN:
-		{
-
-		}
-		case GL_TRIANGLE_STRIP:
-		{
-
-		}
-		default:
-			break;
-		}
-	}
-
-	return 0;
 }
