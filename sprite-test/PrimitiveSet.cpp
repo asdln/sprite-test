@@ -38,13 +38,7 @@ PrimitiveSet::~PrimitiveSet()
 void PrimitiveSet::init()
 {
 	calculate3size(normals_, normal_count_, vertices_, vertice_count_);
-
-	//计算中心点位置
-	QVector4D center(center_[0], center_[1], center_[2], 1.0);
-	QVector4D centerNew = matrix_ * center;
-	center_[0] = centerNew.x() / centerNew.w();
-	center_[1] = centerNew.y() / centerNew.w();
-	center_[2] = centerNew.z() / centerNew.w();
+	calc_center();
 
 	initializeOpenGLFunctions();
 

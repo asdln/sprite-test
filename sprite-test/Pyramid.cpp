@@ -9,6 +9,12 @@ Pyramid::Pyramid()
 
 void Pyramid::init()
 {
+	center_[0] = 0.0f;
+	center_[1] = 0.25f;
+	center_[2] = 0.0f;
+
+	calc_center();
+
 	auto l = std::make_shared<Triangle>();
 	auto r = std::make_shared<Triangle>();
 	auto f = std::make_shared<Triangle>();
@@ -51,8 +57,4 @@ void Pyramid::init()
 	b->init();
 
  	p->init();
-
-	center_[0] = 0.0f;
-	center_[1] = 0.25f;
-	center_[2] = 0.0f;
 }

@@ -26,11 +26,20 @@ public:
 
 	void scale(float x, float y, float z) { matrix_.scale(x, y, z); }
 
+	void calc_center();
+
 	void get_center(float& x, float& y, float& z) 
 	{
 		x = center_[0]; 
 		y = center_[1]; 
 		z = center_[2];
+	}
+
+	void get_center_offset(QVector3D& center)
+	{
+		center.setX(-center_[0]);
+		center.setY(-center_[1]);
+		center.setZ(-center_[2]);
 	}
 
 protected:

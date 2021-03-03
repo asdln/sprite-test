@@ -3,6 +3,8 @@
 
 void Cube::init()
 {
+	calc_center();
+
 	auto l = std::make_shared<Plane>();
 	primitive_set_collection_.emplace_back(l);
 	float offset = l->size() * 0.5;

@@ -95,12 +95,11 @@ void ViewerWindow::mousePressEvent(QMouseEvent *ev)
 		pick_lines_.push_back(pick_line);
 		pick_line->init();
 
-		QVector3D new_center;
 		for (auto shape : shapes_)
 		{
 			if (shape->line_intersect((float*)&a, (float*)&b) >= 0)
 			{
-
+				shape->get_center_offset(center_);
 			}
 		}
 	}
@@ -117,6 +116,8 @@ void ViewerWindow::mouseReleaseEvent(QMouseEvent *ev)
 void ViewerWindow::keyPressEvent(QKeyEvent *ev)
 {
 	rotate_ = QQuaternion();
+	center_ = QVector3D(0.0, 0.0, 0.0);
+
 	distance_ = -10.0;
 	pick_lines_.clear();
 }
