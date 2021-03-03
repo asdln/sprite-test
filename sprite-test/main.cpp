@@ -335,7 +335,7 @@ void TriangleWindow::initialize()
 	glEnable(GL_DEPTH_TEST);
 
 	vColorAttr_ = glGetUniformLocation(Program, "vVertColor");
-	GLfloat colors[] = { 1.0, 0.0, 0.0, 1.0 };
+	GLfloat colors[] = { 0.0, 0.0, 1.0, 1.0 };
 	//glVertexAttribPointer(vColorAttr_, 4, GL_FLOAT, GL_FALSE, 0, colors);
 	//glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 	glUniform4fv(vColorAttr_, 1, colors);
