@@ -74,20 +74,22 @@ void PrimitiveSet::draw()
 
 int PrimitiveSet::line_intersect(float* p0, float* p1)
 {
+	pricked_primitives_.clear();
+
 	for (const auto& primitive : primitives_)
 	{
 		switch (primitive.mode)
 		{
 		case GL_TRIANGLES:
 		{
-			size_t start_indice = primitive.offset / sizeof(GLushort);
+			size_t start_indice = primitive.offset;
 			for (int i = 0; i < primitive.count / 3; i++)
 			{
 				int res = line_triangle_intersect(p0, p1, vertices_ + indices_[start_indice + i * 3] * 3, vertices_ + indices_[start_indice + i * 3 + 1] * 3, vertices_ + indices_[start_indice + i * 3 + 2] * 3);
 				if (res >= 0)
 				{
 					printf("tested \n");
-
+					pricked_primitives_.emplace_back(primitive.mode, primitive.count, primitive.type, primitive.offset);
 				}
 			}
 

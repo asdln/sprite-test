@@ -41,6 +41,8 @@ protected:
 
 	std::vector<Primitive> primitives_;
 
+	std::vector<Primitive> pricked_primitives_;
+
 	GLuint vert = 0;
 	GLuint vbo_vertex = 0;
 	GLuint vbo_normal = 0;

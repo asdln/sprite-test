@@ -3,11 +3,13 @@
 layout(location = 0) in vec4 vPos;
 layout(location = 1) in vec3 vVertNormal;
 //layout(location = 0) out vec4 vColor;
+uniform vec4 vVertColor;
 uniform highp mat4 matrix_mv;
 uniform highp mat4 matrix_p;
 
 out vec3 Normal;
 out vec4 Pos;
+out vec4 vColor;
 
 void main()
 {
@@ -21,5 +23,5 @@ void main()
 	//gl_PointSize = (pos.z/pos.w * -1.0 + 0.930501938) / (0.930501938-0.835168540) * 64.0 + 1.0;
 	//gl_PointSize = (pos.z - 1.2) / 1.6 * 64.0 + 1.0;
 	//gl_Position = pos;
-	//vColor = vec4(1.0, 0.0, 0.0, 1.0);
+	vColor = vVertColor;
 }

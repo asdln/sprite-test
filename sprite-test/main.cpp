@@ -117,7 +117,6 @@ public:
 			//tempMatrix_ = mat * tempMatrix_;
 			//tempMatrix_ = tempMatrix_ * mat;
 
-			requestUpdate();
 		}
 		else if (ev->buttons() & Qt::MiddleButton)
 		{
@@ -175,7 +174,6 @@ public:
 
 		}
 
-		requestUpdate();
 	}
 
 	virtual void keyPressEvent(QKeyEvent *ev)
@@ -184,7 +182,6 @@ public:
 		distance_ = -10.0;
 		pick_lines_.clear();
 
-		requestUpdate();
 	}
 
 	virtual void wheelEvent(QWheelEvent *ev)
@@ -200,7 +197,6 @@ public:
 			distance_ -= 1.0;
 		}
 
-		requestUpdate();
 	}
 
 protected:
@@ -224,9 +220,7 @@ protected:
 private:
 
 	GLuint Program = 0;
-
-	GLuint vert;
-	GLuint vbo;
+	GLuint vColorAttr_ = 0;
 
 	GLuint tex;
 
@@ -339,6 +333,12 @@ void TriangleWindow::initialize()
 
 	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+
+	vColorAttr_ = glGetUniformLocation(Program, "vVertColor");
+	GLfloat colors[] = { 1.0, 0.0, 0.0, 1.0 };
+	//glVertexAttribPointer(vColorAttr_, 4, GL_FLOAT, GL_FALSE, 0, colors);
+	//glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+	glUniform4fv(vColorAttr_, 1, colors);
 	
 	//glShadeModel(GL_SMOOTH);
 
@@ -430,6 +430,7 @@ void TriangleWindow::render()
 	//glUseProgram(0);
 
     ++m_frame;
+	requestUpdate();
 }
 //! [5]
 

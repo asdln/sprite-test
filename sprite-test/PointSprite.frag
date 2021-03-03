@@ -12,12 +12,13 @@ uniform float Shininess;
 uniform float Strength;
 
 in vec3 Normal;
+in vec4 vColor;
 
 void main()
 {
 	//fColor = texture(tex, gl_PointCoord);
     //fColor = mix(fColor, color2, smoothstep(0.1, 0.25, f));
-	vec4 color = vec4(0.0, 0.0, 1.0, 1.0);
+	vec4 color = vColor;//vec4(0.0, 0.0, 1.0, 1.0);
 	
 	float diffuse = max(0.0f, dot(Normal, -LightDirection));
     float specular = max(0.0f, dot(Normal, HalfVector));
