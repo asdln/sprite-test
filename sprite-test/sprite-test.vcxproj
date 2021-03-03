@@ -23,6 +23,7 @@
     <ClCompile Include="Pyramid.cpp" />
     <ClCompile Include="teapot.cpp" />
     <ClCompile Include="Triangle.cpp" />
+    <ClCompile Include="ViewerWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="openglwindow.h" />
@@ -43,6 +44,7 @@
     <ClInclude Include="teapot.h" />
     <ClInclude Include="teapot_data.h" />
     <ClInclude Include="Triangle.h" />
+    <ClInclude Include="ViewerWindow.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6880631C-361A-46CF-8A7B-E538714153E4}</ProjectGuid>

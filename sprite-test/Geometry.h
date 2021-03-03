@@ -26,9 +26,18 @@ public:
 
 	void scale(float x, float y, float z) { matrix_.scale(x, y, z); }
 
+	void get_center(float& x, float& y, float& z) 
+	{
+		x = center_[0]; 
+		y = center_[1]; 
+		z = center_[2];
+	}
+
 protected:
 
 	QMatrix4x4 matrix_;
 
+
+	float center_[3] = { 0, 0, 0 };
 };
 

@@ -39,6 +39,10 @@ Triangle::Triangle()
 	indices_[2] = 2;
 
 	primitives_.emplace_back(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+
+	center_[0] = 0.0f;
+	center_[1] = 1.4142135623731 * 0.25;
+	center_[2] = 0.0f;
 }
 
 

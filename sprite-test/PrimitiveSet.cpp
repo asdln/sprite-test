@@ -39,6 +39,13 @@ void PrimitiveSet::init()
 {
 	calculate3size(normals_, normal_count_, vertices_, vertice_count_);
 
+	//计算中心点位置
+	QVector4D center(center_[0], center_[1], center_[2], 1.0);
+	QVector4D centerNew = matrix_ * center;
+	center_[0] = centerNew.x() / centerNew.w();
+	center_[1] = centerNew.y() / centerNew.w();
+	center_[2] = centerNew.z() / centerNew.w();
+
 	initializeOpenGLFunctions();
 
 	glGenVertexArrays(1, &vert_);
@@ -118,8 +125,9 @@ void PrimitiveSet::draw_selection()
 int PrimitiveSet::line_intersect(float* p0, float* p1)
 {
 	pricked_primitives_.clear();
-
 	std::vector<GLushort> indices;
+
+	int result = -1;
 
 	for (const auto& primitive : primitives_)
 	{
@@ -145,6 +153,8 @@ int PrimitiveSet::line_intersect(float* p0, float* p1)
  						indices.push_back(indices_[start_indice + i * 3 + 1]);
  						indices.push_back(indices_[start_indice + i * 3 + 2]);
 					}
+
+					result = res;
 				}
 			}
 
@@ -170,6 +180,8 @@ int PrimitiveSet::line_intersect(float* p0, float* p1)
 						indices.push_back(indices_[start_indice + i - 1]);
 						indices.push_back(indices_[start_indice + i]);
 					}
+
+					result = res;
 				}
 			}
 
@@ -195,6 +207,8 @@ int PrimitiveSet::line_intersect(float* p0, float* p1)
 						indices.push_back(indices_[start_indice + i - 1]);
 						indices.push_back(indices_[start_indice + i]);
 					}
+
+					result = res;
 				}
 			}
 
@@ -216,5 +230,5 @@ int PrimitiveSet::line_intersect(float* p0, float* p1)
 		//glBindVertexArray(0);
 	}
 
-	return 0;
+	return result;
 }

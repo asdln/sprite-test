@@ -52,4 +52,7 @@ void Pyramid::init()
 
  	p->init();
 
+	center_[0] = 0.0f;
+	center_[1] = 0.25f;
+	center_[2] = 0.0f;
 }

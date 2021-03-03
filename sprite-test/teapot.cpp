@@ -197,6 +197,10 @@ Teapot::Teapot()
 	memcpy(indices_, teapotIndices, indices_size);
 
 	indice_count_ = sizeof(teapotIndices) / sizeof(GLushort);
+
+	center_[0] = 0.0f;
+	center_[1] = 1.57f;
+	center_[2] = 0.0f;
 }
 
 Teapot::~Teapot()

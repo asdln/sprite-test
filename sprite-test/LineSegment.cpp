@@ -30,6 +30,10 @@ LineSegment::LineSegment(QVector3D p1, QVector3D p2)
 	indices_[1] = 1;
 
 	primitives_.emplace_back(GL_LINES, 2, GL_UNSIGNED_SHORT, 0);
+
+	center_[0] = (p1.x() + p2.x()) * 0.5;
+	center_[1] = (p1.y() + p2.y()) * 0.5;
+	center_[2] = (p1.z() + p2.z()) * 0.5;
 }
 
 LineSegment::~LineSegment()
