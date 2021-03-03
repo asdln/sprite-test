@@ -5,6 +5,11 @@
 #include <QtGui/QMatrix3x3>
 #include "Geometry.h"
 
+enum class SelectMode
+{
+	SELECT_ELEMENT,
+	SELECT_TRIANGLE
+};
 
 
 struct Primitive
@@ -35,19 +40,27 @@ public:
 
 	virtual void draw();
 
+	virtual void draw_selection();
+
 	virtual int line_intersect(float* p0, float* p1);
 
 protected:
+
+	SelectMode select_mode_ = SelectMode::SELECT_ELEMENT;
 
 	std::vector<Primitive> primitives_;
 
 	std::vector<Primitive> pricked_primitives_;
 
-	GLuint vert = 0;
-	GLuint vbo_vertex = 0;
-	GLuint vbo_normal = 0;
+	GLuint vert_ = 0;
+	GLuint vbo_vertex_ = 0;
+	GLuint vbo_normal_ = 0;
 
-	GLuint ebo = 0;
+	GLuint ebo_ = 0;
+
+	GLuint vao_select_triangle_;
+
+	GLuint ebo_select_triangle_;
 
 	GLfloat* vertices_ = nullptr;
 	GLfloat* normals_ = nullptr;

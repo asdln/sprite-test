@@ -13,6 +13,14 @@ public:
 		}
 	}
 
+	virtual void draw_selection()
+	{
+		for (auto primitive_set : primitive_set_collection_)
+		{
+			primitive_set->draw_selection();
+		}
+	}
+
 	int line_intersect(float* p0, float* p1)
 	{
 		for (auto primitive_set : primitive_set_collection_)

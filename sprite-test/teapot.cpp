@@ -196,7 +196,7 @@ Teapot::Teapot()
 	indices_ = (GLushort*)new char[indices_size];
 	memcpy(indices_, teapotIndices, indices_size);
 
-	indice_count_ = sizeof(teapotIndices) / sizeof(GLfloat);
+	indice_count_ = sizeof(teapotIndices) / sizeof(GLushort);
 }
 
 Teapot::~Teapot()

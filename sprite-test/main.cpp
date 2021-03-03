@@ -251,29 +251,29 @@ TriangleWindow::~TriangleWindow()
 //! [4]
 void TriangleWindow::initialize()
 {
-	auto teapot = std::make_shared<Teapot>();
-	shapes_.emplace_back(teapot);
-	auto teapot2_ = std::make_shared<Teapot>();
-	shapes_.emplace_back(teapot2_);
+ 	auto teapot = std::make_shared<Teapot>();
+ 	shapes_.emplace_back(teapot);
+ 	auto teapot2_ = std::make_shared<Teapot>();
+ 	shapes_.emplace_back(teapot2_);
 
 	auto plane_ = std::make_shared<Plane>();
 	shapes_.emplace_back(plane_);
 
-	auto cube1_ = std::make_shared<Cube>();
-	shapes_.emplace_back(cube1_);
-	auto cube2_ = std::make_shared<Cube>();
-	shapes_.emplace_back(cube2_);
-
-	auto triangle_ = std::make_shared<Triangle>();
-	shapes_.emplace_back(triangle_);
-
-	auto pyramid_ = std::make_shared<Pyramid>();
-	shapes_.emplace_back(pyramid_);
-	auto pyramid2_ = std::make_shared<Pyramid>();
-	shapes_.emplace_back(pyramid2_);
-
-	auto line_ = std::make_shared<LineSegment>(QVector3D(0, 0, 0), QVector3D(10.0, 10.0, 10.0));
-	shapes_.emplace_back(line_);
+ 	auto cube1_ = std::make_shared<Cube>();
+ 	shapes_.emplace_back(cube1_);
+ 	auto cube2_ = std::make_shared<Cube>();
+ 	shapes_.emplace_back(cube2_);
+ 
+ 	auto triangle_ = std::make_shared<Triangle>();
+ 	shapes_.emplace_back(triangle_);
+ 
+ 	auto pyramid_ = std::make_shared<Pyramid>();
+ 	shapes_.emplace_back(pyramid_);
+ 	auto pyramid2_ = std::make_shared<Pyramid>();
+ 	shapes_.emplace_back(pyramid2_);
+ 
+ 	auto line_ = std::make_shared<LineSegment>(QVector3D(0, 0, 0), QVector3D(10.0, 10.0, 10.0));
+ 	shapes_.emplace_back(line_);
 
 	ShaderInfo si[] = { { GL_VERTEX_SHADER, "PointSprite.vert" },{ GL_FRAGMENT_SHADER, "PointSprite.frag" },{ GL_NONE, NULL } };
 	Program = LoadShaders(si);
@@ -299,7 +299,7 @@ void TriangleWindow::initialize()
 	pyramid_->scale(1, 4, 1);
 
 	pyramid2_->translate(-2, 0, 2);
-	pyramid2_->scale(1, 2, 1);
+ 	pyramid2_->scale(1, 2, 1);
 
 	for (auto shape : shapes_)
 	{
@@ -336,8 +336,6 @@ void TriangleWindow::initialize()
 
 	vColorAttr_ = glGetUniformLocation(Program, "vVertColor");
 	GLfloat colors[] = { 0.0, 0.0, 1.0, 1.0 };
-	//glVertexAttribPointer(vColorAttr_, 4, GL_FLOAT, GL_FALSE, 0, colors);
-	//glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 	glUniform4fv(vColorAttr_, 1, colors);
 	
 	//glShadeModel(GL_SMOOTH);
@@ -409,14 +407,26 @@ void TriangleWindow::render()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+	GLfloat colors2[] = { 1.0, 0.0, 0.0, 1.0 };
+	glUniform4fv(vColorAttr_, 1, colors2);
+
+	//先画选择集。因为深度pass为“大于”
 	for (auto shape : shapes_)
 	{
-		shape->draw();
+		shape->draw_selection();
 	}
 
 	for (auto line : pick_lines_)
 	{
 		line->draw();
+	}
+
+	GLfloat colors[] = { 0.0, 0.0, 1.0, 1.0 };
+	glUniform4fv(vColorAttr_, 1, colors);
+
+	for (auto shape : shapes_)
+	{
+		shape->draw();
 	}
 
 	//glBindVertexArray(vert);

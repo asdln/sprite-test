@@ -12,6 +12,8 @@ public:
 
 	virtual void draw() = 0;
 
+	virtual void draw_selection() = 0;
+
 	virtual int line_intersect(float* p0, float* p1) = 0;
 
 	void calculate3size(GLfloat* normals, int normals_size, GLfloat* vertices, int vertices_size);
