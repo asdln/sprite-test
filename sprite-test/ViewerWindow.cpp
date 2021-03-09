@@ -139,63 +139,7 @@ void ViewerWindow::wheelEvent(QWheelEvent *ev)
 //! [4]
 void ViewerWindow::initialize()
 {
-	auto teapot = std::make_shared<Teapot>();
-	shapes_.emplace_back(teapot);
-
-	auto teapot2_ = std::make_shared<Teapot>();
-	shapes_.emplace_back(teapot2_);
-
-	auto plane_ = std::make_shared<Plane>();
-	shapes_.emplace_back(plane_);
-
-	auto cube1_ = std::make_shared<Cube>();
-	shapes_.emplace_back(cube1_);
-
-	auto cube2_ = std::make_shared<Cube>();
-	shapes_.emplace_back(cube2_);
-
-	auto triangle_ = std::make_shared<Triangle>();
-	shapes_.emplace_back(triangle_);
-
-	auto pyramid_ = std::make_shared<Pyramid>();
-	shapes_.emplace_back(pyramid_);
-
-	auto pyramid2_ = std::make_shared<Pyramid>();
-	shapes_.emplace_back(pyramid2_);
-
-	auto line_ = std::make_shared<LineSegment>(QVector3D(0, 0, 0), QVector3D(10.0, 10.0, 10.0));
-	shapes_.emplace_back(line_);
-
-	ShaderInfo si[] = { { GL_VERTEX_SHADER, "PointSprite.vert" },{ GL_FRAGMENT_SHADER, "PointSprite.frag" },{ GL_NONE, NULL } };
-	Program = LoadShaders(si);
-
-	cube1_->translate(2, 1, 2);
-	cube1_->rotate(45, 1, 1, 1);
-
-	cube2_->translate(-2, 1.5, -2);
-	cube2_->scale(1, 3, 1);
-
-	teapot->scale(0.5, 0.5, 0.5);
-	plane_->scale(12, 0, 12);
-
-	teapot2_->translate(2, 1, -4);
-	teapot2_->rotate(90, 1, 1, 1);
-	teapot2_->scale(0.5, 0.5, 0.5);
-
-	triangle_->translate(3, 0, -2);
-	triangle_->scale(1, 2, 1);
-
-	pyramid_->translate(0, 3, 0);
-	pyramid_->rotate(90, 1, 0, 0);
-	pyramid_->scale(1, 4, 1);
-
-	pyramid2_->translate(-2, 0, 2);
-	pyramid2_->scale(1, 2, 1);
-
-	for (auto shape : shapes_)
-	{
-		shape->init();
-	}
+	create_geometrys();
 
 	float texData[] = { 1.0, 0.0, 0.0, 1.0,
 						0.0, 1.0, 0.0, 1.0,
@@ -218,6 +162,9 @@ void ViewerWindow::initialize()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glClearColor(0.2f, 0.1f, 0.3f, 1.0f);
+
+	ShaderInfo si[] = { { GL_VERTEX_SHADER, "PointSprite.vert" },{ GL_FRAGMENT_SHADER, "PointSprite.frag" },{ GL_NONE, NULL } };
+	Program = LoadShaders(si);
 	glUseProgram(Program);
 	//glEnable(GL_POINT_SPRITE);
 	//glEnable(GL_PROGRAM_POINT_SIZE);
@@ -265,6 +212,64 @@ void ViewerWindow::initialize()
 }
 //! [4]
 
+void ViewerWindow::create_geometrys()
+{
+	auto teapot = std::make_shared<Teapot>();
+	shapes_.emplace_back(teapot);
+
+	auto teapot2_ = std::make_shared<Teapot>();
+	shapes_.emplace_back(teapot2_);
+
+	auto plane_ = std::make_shared<Plane>();
+	shapes_.emplace_back(plane_);
+
+	auto cube1_ = std::make_shared<Cube>();
+	shapes_.emplace_back(cube1_);
+
+	auto cube2_ = std::make_shared<Cube>();
+	shapes_.emplace_back(cube2_);
+
+	auto triangle_ = std::make_shared<Triangle>();
+	shapes_.emplace_back(triangle_);
+
+	auto pyramid_ = std::make_shared<Pyramid>();
+	shapes_.emplace_back(pyramid_);
+
+	auto pyramid2_ = std::make_shared<Pyramid>();
+	shapes_.emplace_back(pyramid2_);
+
+	auto line_ = std::make_shared<LineSegment>(QVector3D(0, 0, 0), QVector3D(10.0, 10.0, 10.0));
+	shapes_.emplace_back(line_);
+
+	cube1_->translate(2, 1, 2);
+	cube1_->rotate(45, 1, 1, 1);
+
+	cube2_->translate(-2, 1.5, -2);
+	cube2_->scale(1, 3, 1);
+
+	teapot->scale(0.5, 0.5, 0.5);
+	plane_->scale(12, 0, 12);
+
+	teapot2_->translate(2, 1, -4);
+	teapot2_->rotate(90, 1, 1, 1);
+	teapot2_->scale(0.5, 0.5, 0.5);
+
+	triangle_->translate(3, 0, -2);
+	triangle_->scale(1, 2, 1);
+
+	pyramid_->translate(0, 3, 0);
+	pyramid_->rotate(90, 1, 0, 0);
+	pyramid_->scale(1, 4, 1);
+
+	pyramid2_->translate(-2, 0, 2);
+	pyramid2_->scale(1, 2, 1);
+
+	for (auto shape : shapes_)
+	{
+		shape->init();
+	}
+}
+
 //! [5]
 void ViewerWindow::render()
 {
@@ -277,8 +282,11 @@ void ViewerWindow::render()
 // 
 // 	matrix_mv.translate(0, -1.57f, 0);
 
-	QMatrix4x4 matrix1;
-	matrix1.translate(0, 0, distance_);
+	QMatrix4x4 rotate_self;
+	rotate_self.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+
+	QMatrix4x4 matrix_trans_to_eye;
+	matrix_trans_to_eye.translate(0, 0, distance_);
 
 	//matrix_mv = matrix_mv * tempMatrix_;
 
@@ -288,11 +296,11 @@ void ViewerWindow::render()
 	// 	QMatrix4x4 matrix2;
 	// 	matrix2.translate(0, -1.57f, 0);
 
-	QMatrix4x4 matrix2;
-	matrix2.translate(center_);
+	QMatrix4x4 matrix_trans_to_center;
+	matrix_trans_to_center.translate(center_);
 
 	QMatrix4x4 matrix_mv;
-	matrix_mv = matrix1 * mat_rotate * matrix2;
+	matrix_mv = matrix_trans_to_eye * mat_rotate * matrix_trans_to_center;
 
 	glUseProgram(Program);
 

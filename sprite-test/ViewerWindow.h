@@ -42,6 +42,10 @@ public:
 
 protected:
 
+	void create_geometrys();
+
+protected:
+
 	//QMatrix4x4 tempMatrix_;
 
 	QQuaternion rotate_;
