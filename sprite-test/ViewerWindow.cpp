@@ -216,53 +216,46 @@ void ViewerWindow::create_geometrys()
 {
 	auto teapot = std::make_shared<Teapot>();
 	shapes_.emplace_back(teapot);
+	teapot->scale(0.5, 0.5, 0.5);
 
 	auto teapot2_ = std::make_shared<Teapot>();
 	shapes_.emplace_back(teapot2_);
-
-	auto plane_ = std::make_shared<Plane>();
-	shapes_.emplace_back(plane_);
-
-	auto cube1_ = std::make_shared<Cube>();
-	shapes_.emplace_back(cube1_);
-
-	auto cube2_ = std::make_shared<Cube>();
-	shapes_.emplace_back(cube2_);
-
-	auto triangle_ = std::make_shared<Triangle>();
-	shapes_.emplace_back(triangle_);
-
-	auto pyramid_ = std::make_shared<Pyramid>();
-	shapes_.emplace_back(pyramid_);
-
-	auto pyramid2_ = std::make_shared<Pyramid>();
-	shapes_.emplace_back(pyramid2_);
-
-	auto line_ = std::make_shared<LineSegment>(QVector3D(0, 0, 0), QVector3D(10.0, 10.0, 10.0));
-	shapes_.emplace_back(line_);
-
-	cube1_->translate(2, 1, 2);
-	cube1_->rotate(45, 1, 1, 1);
-
-	cube2_->translate(-2, 1.5, -2);
-	cube2_->scale(1, 3, 1);
-
-	teapot->scale(0.5, 0.5, 0.5);
-	plane_->scale(12, 0, 12);
-
 	teapot2_->translate(2, 1, -4);
 	teapot2_->rotate(90, 1, 1, 1);
 	teapot2_->scale(0.5, 0.5, 0.5);
 
+	auto plane_ = std::make_shared<Plane>();
+	shapes_.emplace_back(plane_);
+ 	plane_->scale(12, 0, 12);
+
+	auto cube1_ = std::make_shared<Cube>();
+	shapes_.emplace_back(cube1_);
+	cube1_->translate(2, 1, 2);
+	cube1_->rotate(45, 1, 1, 1);
+
+	auto cube2_ = std::make_shared<Cube>();
+	shapes_.emplace_back(cube2_);
+	cube2_->translate(-2, 1.5, -2);
+	cube2_->scale(1, 3, 1);
+
+	auto triangle_ = std::make_shared<Triangle>();
+	shapes_.emplace_back(triangle_);
 	triangle_->translate(3, 0, -2);
 	triangle_->scale(1, 2, 1);
 
+	auto pyramid_ = std::make_shared<Pyramid>();
+	shapes_.emplace_back(pyramid_);
 	pyramid_->translate(0, 3, 0);
 	pyramid_->rotate(90, 1, 0, 0);
 	pyramid_->scale(1, 4, 1);
 
+	auto pyramid2_ = std::make_shared<Pyramid>();
+	shapes_.emplace_back(pyramid2_);
 	pyramid2_->translate(-2, 0, 2);
 	pyramid2_->scale(1, 2, 1);
+
+	auto line_ = std::make_shared<LineSegment>(QVector3D(0, 0, 0), QVector3D(10.0, 10.0, 10.0));
+	shapes_.emplace_back(line_);
 
 	for (auto shape : shapes_)
 	{
@@ -320,15 +313,24 @@ void ViewerWindow::render()
 
 	for (auto line : pick_lines_)
 	{
-		line->draw();
+		line->draw(m_matrixUniform_mv, matrix_mv_);
 	}
 
 	GLfloat colors[] = { 0.0, 0.0, 1.0, 1.0 };
 	glUniform4fv(vColorAttr_, 1, colors);
 
+	bool tag = 0;
 	for (auto shape : shapes_)
 	{
-		shape->draw();
+		std::shared_ptr<Teapot> teapot = std::dynamic_pointer_cast<Teapot>(shape);
+		//使用标记，只旋转一个茶壶
+		if (teapot && !tag) 
+		{
+			tag = 1;
+			teapot->set_matrix_front(rotate_self);
+		}
+		
+		shape->draw(m_matrixUniform_mv, matrix_mv_);
 	}
 
 	//glBindVertexArray(vert);

@@ -38,11 +38,11 @@ public:
 
 	virtual void init();
 
-	virtual void draw();
+	virtual void draw(GLuint uniform_mv, const QMatrix4x4& mv) override;
 
-	virtual void draw_selection();
+	virtual void draw_selection() override;
 
-	virtual int line_intersect(float* p0, float* p1);
+	virtual int line_intersect(float* p0, float* p1) override;
 
 protected:
 

@@ -37,7 +37,7 @@ PrimitiveSet::~PrimitiveSet()
 
 void PrimitiveSet::init()
 {
-	calculate3size(normals_, normal_count_, vertices_, vertice_count_);
+	//calculate3size(normals_, normal_count_, vertices_, vertice_count_);
 	calc_center();
 
 	initializeOpenGLFunctions();
@@ -82,10 +82,17 @@ void PrimitiveSet::init()
 	}
 }
 
-void PrimitiveSet::draw()
+void PrimitiveSet::draw(GLuint uniform_mv, const QMatrix4x4& mv)
 {
 // 	if (!pricked_primitives_.empty())
 // 		return;
+
+	QMatrix4x4 matrix_scale;
+	matrix_scale.scale(scale_[0], scale_[1], scale_[2]);
+
+	QMatrix4x4 matrix_local;
+	matrix_local = mv * matrix_ * matrix_front_ * matrix_scale;
+	glUniformMatrix4fv(uniform_mv, 1, GL_FALSE, matrix_local.data());
 
 	glBindVertexArray(vert_);
 
