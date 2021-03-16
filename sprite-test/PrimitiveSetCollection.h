@@ -7,9 +7,9 @@ public:
 
 	virtual void draw(GLuint uniform_mv, const QMatrix4x4& mv) override;
 
-	virtual void draw_selection() override;
+	virtual void draw_selection(GLuint uniform_mv, const QMatrix4x4& mv) override;
 
-	int line_intersect(float* p0, float* p1) override;
+	int line_intersect(float* p0, float* p1, QMatrix4x4 ma) override;
 
 protected:
 

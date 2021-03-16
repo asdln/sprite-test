@@ -62,6 +62,8 @@ protected:
 
 	float r_ = 0.8f;
 
+	bool is_rotate_ = true;
+
 private:
 
 	GLuint Program = 0;

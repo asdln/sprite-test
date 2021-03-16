@@ -82,6 +82,24 @@ void PrimitiveSet::init()
 	}
 }
 
+void PrimitiveSet::local(float* vertex, float* out, QMatrix4x4 ma)
+{
+	QMatrix4x4 matrix_scale;
+	matrix_scale.scale(scale_[0], scale_[1], scale_[2]);
+
+	QMatrix4x4 matrix_local;
+	matrix_local = matrix_ * matrix_front_ * matrix_scale;
+
+	matrix_local = ma * matrix_local;
+
+	QVector4D vec(vertex[0], vertex[1], vertex[2], 1.0);
+	vec = matrix_local * vec;
+
+	out[0] = vec.x() / vec.w();
+	out[1] = vec.y() / vec.w();
+	out[2] = vec.z() / vec.w();
+}
+
 void PrimitiveSet::draw(GLuint uniform_mv, const QMatrix4x4& mv)
 {
 // 	if (!pricked_primitives_.empty())
@@ -104,8 +122,15 @@ void PrimitiveSet::draw(GLuint uniform_mv, const QMatrix4x4& mv)
 	glBindVertexArray(0);
 }
 
-void PrimitiveSet::draw_selection()
+void PrimitiveSet::draw_selection(GLuint uniform_mv, const QMatrix4x4& mv)
 {
+	QMatrix4x4 matrix_scale;
+	matrix_scale.scale(scale_[0], scale_[1], scale_[2]);
+
+	QMatrix4x4 matrix_local;
+	matrix_local = mv * matrix_ * matrix_front_ * matrix_scale;
+	glUniformMatrix4fv(uniform_mv, 1, GL_FALSE, matrix_local.data());
+
 	if (select_mode_ == SelectMode::SELECT_ELEMENT)
 	{
 		glBindVertexArray(vert_);
@@ -123,7 +148,7 @@ void PrimitiveSet::draw_selection()
 	glBindVertexArray(0);
 }
 
-int PrimitiveSet::line_intersect(float* p0, float* p1)
+int PrimitiveSet::line_intersect(float* p0, float* p1, QMatrix4x4 ma)
 {
 	pricked_primitives_.clear();
 	std::vector<GLushort> indices;
@@ -139,7 +164,15 @@ int PrimitiveSet::line_intersect(float* p0, float* p1)
 			size_t start_indice = primitive.offset;
 			for (int i = 0; i < primitive.count / 3; i++)
 			{
-				int res = line_triangle_intersect(p0, p1, vertices_ + indices_[start_indice + i * 3] * 3, vertices_ + indices_[start_indice + i * 3 + 1] * 3, vertices_ + indices_[start_indice + i * 3 + 2] * 3);
+				float v1[3];
+				float v2[3];
+				float v3[3];
+
+				local(vertices_ + indices_[start_indice + i * 3] * 3, v1, ma);
+				local(vertices_ + indices_[start_indice + i * 3 + 1] * 3, v2, ma);
+				local(vertices_ + indices_[start_indice + i * 3 + 2] * 3, v3, ma);
+
+				int res = line_triangle_intersect(p0, p1, v1, v2, v3);
 				if (res >= 0)
 				{
 					printf("tested \n");
@@ -166,7 +199,15 @@ int PrimitiveSet::line_intersect(float* p0, float* p1)
 			size_t start_indice = primitive.offset;
 			for (int i = 2; i < primitive.count; i++)
 			{
-				int res = line_triangle_intersect(p0, p1, vertices_ + indices_[start_indice] * 3, vertices_ + indices_[start_indice + i - 1] * 3, vertices_ + indices_[start_indice + i] * 3);
+				float v1[3];
+				float v2[3];
+				float v3[3];
+
+				local(vertices_ + indices_[start_indice] * 3, v1, ma);
+				local(vertices_ + indices_[start_indice + i - 1] * 3, v2, ma);
+				local(vertices_ + indices_[start_indice + i] * 3, v3, ma);
+
+				int res = line_triangle_intersect(p0, p1, v1, v2, v3);
 				if (res >= 0)
 				{
 					printf("tested \n");
@@ -193,7 +234,15 @@ int PrimitiveSet::line_intersect(float* p0, float* p1)
 			size_t start_indice = primitive.offset;
 			for (int i = 2; i < primitive.count; i++)
 			{
-				int res = line_triangle_intersect(p0, p1, vertices_ + indices_[start_indice + i - 2] * 3, vertices_ + indices_[start_indice + i - 1] * 3, vertices_ + indices_[start_indice + i] * 3);
+				float v1[3];
+				float v2[3];
+				float v3[3];
+
+				local(vertices_ + indices_[start_indice + i - 2] * 3, v1, ma);
+				local(vertices_ + indices_[start_indice + i - 1] * 3, v2, ma);
+				local(vertices_ + indices_[start_indice + i] * 3, v3, ma);
+
+				int res = line_triangle_intersect(p0, p1, v1, v2, v3);
 				if (res >= 0)
 				{
 					printf("tested \n");

@@ -97,7 +97,7 @@ void ViewerWindow::mousePressEvent(QMouseEvent *ev)
 
 		for (auto shape : shapes_)
 		{
-			if (shape->line_intersect((float*)&a, (float*)&b) >= 0)
+			if (shape->line_intersect((float*)&a, (float*)&b, QMatrix4x4()) >= 0)
 			{
 				shape->get_center_offset(center_);
 			}
@@ -115,11 +115,18 @@ void ViewerWindow::mouseReleaseEvent(QMouseEvent *ev)
 
 void ViewerWindow::keyPressEvent(QKeyEvent *ev)
 {
-	rotate_ = QQuaternion();
-	center_ = QVector3D(0.0, 0.0, 0.0);
+	if (ev->key() == 82)
+	{
+		is_rotate_ = !is_rotate_;
+	}
+	else
+	{
+		rotate_ = QQuaternion();
+		center_ = QVector3D(0.0, 0.0, 0.0);
 
-	distance_ = -10.0;
-	pick_lines_.clear();
+		distance_ = -10.0;
+		pick_lines_.clear();
+	}
 }
 
 void ViewerWindow::wheelEvent(QWheelEvent *ev)
@@ -308,7 +315,7 @@ void ViewerWindow::render()
 	//先画选择集。因为深度pass为“大于”
 	for (auto shape : shapes_)
 	{
-		shape->draw_selection();
+		shape->draw_selection(m_matrixUniform_mv, matrix_mv_);
 	}
 
 	for (auto line : pick_lines_)
@@ -343,6 +350,8 @@ void ViewerWindow::render()
 
 	//glUseProgram(0);
 
-	++m_frame;
+	if(is_rotate_)
+		++m_frame;
+
 	requestUpdate();
 }

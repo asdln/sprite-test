@@ -12,9 +12,9 @@ public:
 
 	virtual void draw(GLuint, const QMatrix4x4&) = 0;
 
-	virtual void draw_selection() = 0;
+	virtual void draw_selection(GLuint uniform_mv, const QMatrix4x4& mv) = 0;
 
-	virtual int line_intersect(float* p0, float* p1) = 0;
+	virtual int line_intersect(float* p0, float* p1, QMatrix4x4 ma) = 0;
 
 //	void calculate3size(GLfloat* normals, int normals_size, GLfloat* vertices, int vertices_size);
 
