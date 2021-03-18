@@ -28,7 +28,7 @@ struct Primitive
 	}
 };
 
-class PrimitiveSet : public Geometry, public QOpenGLFunctions_4_3_Core
+class PrimitiveSet : public Geometry
 {
 public:
 
@@ -36,9 +36,9 @@ public:
 
 	~PrimitiveSet();
 
-	virtual void init();
+	virtual void initImplemetation(GLuint program) override;
 
-	virtual void draw(GLuint uniform_mv, const QMatrix4x4& mv) override;
+	virtual void drawImplemetation(GLuint uniform_mv, const QMatrix4x4& mv) override;
 
 	virtual void draw_selection(GLuint uniform_mv, const QMatrix4x4& mv) override;
 

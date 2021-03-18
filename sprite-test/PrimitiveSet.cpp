@@ -35,12 +35,10 @@ PrimitiveSet::~PrimitiveSet()
 	}
 }
 
-void PrimitiveSet::init()
+void PrimitiveSet::initImplemetation(GLuint program)
 {
+	program_ = program;
 	//calculate3size(normals_, normal_count_, vertices_, vertice_count_);
-	calc_center();
-
-	initializeOpenGLFunctions();
 
 	glGenVertexArrays(1, &vert_);
 	glBindVertexArray(vert_);
@@ -51,11 +49,14 @@ void PrimitiveSet::init()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 /*3*/, (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glGenBuffers(1, &vbo_normal_);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_normal_);
-	glBufferData(GL_ARRAY_BUFFER, normal_count_ * sizeof(GLfloat), normals_, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
+	if (normals_)
+	{
+		glGenBuffers(1, &vbo_normal_);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_normal_);
+		glBufferData(GL_ARRAY_BUFFER, normal_count_ * sizeof(GLfloat), normals_, GL_STATIC_DRAW);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glEnableVertexAttribArray(1);
+	}
 
 	glGenBuffers(1, &ebo_);                           // create a vbo
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);                       // activate vbo id to use
@@ -72,9 +73,12 @@ void PrimitiveSet::init()
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 /*3*/, (void*)0);
 		glEnableVertexAttribArray(0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_normal_);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-		glEnableVertexAttribArray(1);
+		if (normals_)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_normal_);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+			glEnableVertexAttribArray(1);
+		}
 
 		glGenBuffers(1, &ebo_select_triangle_);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_select_triangle_);
@@ -100,7 +104,7 @@ void PrimitiveSet::local(float* vertex, float* out, QMatrix4x4 ma)
 	out[2] = vec.z() / vec.w();
 }
 
-void PrimitiveSet::draw(GLuint uniform_mv, const QMatrix4x4& mv)
+void PrimitiveSet::drawImplemetation(GLuint uniform_mv, const QMatrix4x4& mv)
 {
 // 	if (!pricked_primitives_.empty())
 // 		return;

@@ -4,17 +4,13 @@
 
 Pyramid::Pyramid()
 {
-	
-}
-
-void Pyramid::init()
-{
 	center_[0] = 0.0f;
 	center_[1] = 0.25f;
 	center_[2] = 0.0f;
+}
 
-	calc_center();
-
+void Pyramid::initImplemetation(GLuint program)
+{
 	auto l = std::make_shared<Triangle>();
 	auto r = std::make_shared<Triangle>();
 	auto f = std::make_shared<Triangle>();
@@ -50,11 +46,11 @@ void Pyramid::init()
 	//p->set_matrix(matrix_);
 	p->rotate(180, 1, 0, 0);
 
-	l->init();
-	r->init();
+	l->init(program);
+	r->init(program);
 
-	f->init();
-	b->init();
+	f->init(program);
+	b->init(program);
 
- 	p->init();
+ 	p->init(program);
 }

@@ -4,17 +4,21 @@
 #include <QtGui/QMatrix4x4>
 #include <QtGui/QMatrix3x3>
 
-class Geometry
+class Geometry : public QOpenGLFunctions_4_3_Core
 {
 public:
 
-	virtual void init() = 0;
+	virtual void initImplemetation(GLuint program) = 0;
 
-	virtual void draw(GLuint, const QMatrix4x4&) = 0;
+	virtual void drawImplemetation(GLuint, const QMatrix4x4&) = 0;
 
 	virtual void draw_selection(GLuint uniform_mv, const QMatrix4x4& mv) = 0;
 
 	virtual int line_intersect(float* p0, float* p1, QMatrix4x4 ma) = 0;
+
+	void init(GLuint program);
+
+	void draw(GLuint, const QMatrix4x4&);
 
 //	void calculate3size(GLfloat* normals, int normals_size, GLfloat* vertices, int vertices_size);
 
@@ -46,6 +50,10 @@ public:
 		center.setZ(-center_[2]);
 	}
 
+	void set_program(GLuint program) { program_ = program; }
+
+	GLuint get_program() { return program_; }
+
 protected:
 
 	QMatrix4x4 matrix_;
@@ -55,5 +63,7 @@ protected:
 	float scale_[3] = { 1, 1, 1 };
 
 	float center_[3] = { 0, 0, 0 };
+
+	GLuint program_ = 0;
 };
 

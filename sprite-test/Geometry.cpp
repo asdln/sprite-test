@@ -22,6 +22,21 @@ inline void operator*(const QMatrix3x3& m, GLfloat* v)
 	v[2] = m(2, 0) * x + m(2, 1) * y + m(2, 2) * z;
 }
 
+void Geometry::init(GLuint program)
+{
+	program_ = program;
+	calc_center();
+	initializeOpenGLFunctions();
+
+	initImplemetation(program);
+}
+
+void Geometry::draw(GLuint uniform_mv, const QMatrix4x4& mv)
+{
+	glUseProgram(program_);
+	drawImplemetation(uniform_mv, mv);
+}
+
 // void Geometry::calculate3size(GLfloat* normals, int normals_size, GLfloat* vertices, int vertices_size)
 // {
 // 	if (!matrix_.isIdentity())

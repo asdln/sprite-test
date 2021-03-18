@@ -44,6 +44,8 @@ protected:
 
 	void create_geometrys();
 
+	void calc_mv();
+
 protected:
 
 	//QMatrix4x4 tempMatrix_;
@@ -52,6 +54,8 @@ protected:
 
 	QVector3D center_ = QVector3D(0, 0, 0);
 
+	QVector3D offset_ = QVector3D(0, 0, 0);
+
 	float distance_ = -10.0;
 
 	float x0_;
@@ -59,6 +63,9 @@ protected:
 
 	float x1_;
 	float y1_;
+
+	float ox_;
+	float oy_;
 
 	float r_ = 0.8f;
 

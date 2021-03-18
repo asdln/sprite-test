@@ -8,7 +8,7 @@ class Cube : public PrimitiveSetCollection
 
 public:
 
-	void init();
+	void initImplemetation(GLuint program) override;
 
 };
 

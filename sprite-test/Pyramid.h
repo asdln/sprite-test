@@ -8,7 +8,7 @@ public:
 
 	Pyramid();
 
-	void init();
+	void initImplemetation(GLuint program) override;
 
 
 protected:

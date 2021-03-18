@@ -5,7 +5,7 @@ class PrimitiveSetCollection : public Geometry
 {
 public:
 
-	virtual void draw(GLuint uniform_mv, const QMatrix4x4& mv) override;
+	virtual void drawImplemetation(GLuint uniform_mv, const QMatrix4x4& mv) override;
 
 	virtual void draw_selection(GLuint uniform_mv, const QMatrix4x4& mv) override;
 

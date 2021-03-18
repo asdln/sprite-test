@@ -1,10 +1,8 @@
 #include "Cube.h"
 #include "Plane.h"
 
-void Cube::init()
+void Cube::initImplemetation(GLuint program)
 {
-	calc_center();
-
 	auto l = std::make_shared<Plane>();
 	primitive_set_collection_.emplace_back(l);
 	float offset = l->size() * 0.5;
@@ -49,6 +47,6 @@ void Cube::init()
 
 	for (auto primitive_set : primitive_set_collection_)
 	{
-		primitive_set->init();
+		primitive_set->init(program);
 	}
 }

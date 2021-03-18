@@ -1,7 +1,7 @@
 #include "PrimitiveSetCollection.h"
 
 
-void PrimitiveSetCollection::draw(GLuint uniform_mv, const QMatrix4x4& mv)
+void PrimitiveSetCollection::drawImplemetation(GLuint uniform_mv, const QMatrix4x4& mv)
 {
 	QMatrix4x4 matrix_scale;
 	matrix_scale.scale(scale_[0], scale_[1], scale_[2]);

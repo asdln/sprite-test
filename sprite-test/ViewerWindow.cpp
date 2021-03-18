@@ -29,8 +29,13 @@ void ViewerWindow::mouseMoveEvent(QMouseEvent *ev)
 	x0_ = x1_;
 	y0_ = y1_;
 
-	x1_ = getXnormalized(ev->pos().x(), 0, width() - 1);
-	y1_ = getYnormalized(ev->pos().y(), 0, height() - 1);
+	QVector4D d4test(0, 0, 0, 1);
+	d4test = matrix_p_ * matrix_mv_ * d4test;
+
+	QVector3D d3test = d4test.toVector3DAffine();
+
+	x1_ = getXnormalized(ev->pos().x(), 0, width() - 1) - d3test.x();
+	y1_ = getYnormalized(ev->pos().y(), 0, height() - 1) - d3test.y();
 
 	if (ev->buttons() & Qt::LeftButton)
 	{
@@ -53,21 +58,22 @@ void ViewerWindow::mouseMoveEvent(QMouseEvent *ev)
 		//tempMatrix_ = tempMatrix_ * mat;
 
 	}
-	else if (ev->buttons() & Qt::MiddleButton)
-	{
-		//center_ += QVector3D(x1_ - x0_, y1_ - y0_, 0.0);
-	}
 }
 
 void ViewerWindow::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->buttons() & Qt::LeftButton)
 	{
-		x0_ = getXnormalized(ev->pos().x(), 0, width() - 1);
-		y0_ = getYnormalized(ev->pos().y(), 0, height() - 1);
+		QVector4D d4test(0, 0, 0, 1);
+		d4test = matrix_p_ * matrix_mv_ * d4test;
 
-		x1_ = getXnormalized(ev->pos().x(), 0, width() - 1);
-		y1_ = getYnormalized(ev->pos().y(), 0, height() - 1);
+		QVector3D d3test = d4test.toVector3DAffine();
+
+		x0_ = getXnormalized(ev->pos().x(), 0, width() - 1) - d3test.x();
+		y0_ = getYnormalized(ev->pos().y(), 0, height() - 1) - d3test.y();
+
+		x1_ = getXnormalized(ev->pos().x(), 0, width() - 1) - d3test.x();
+		y1_ = getYnormalized(ev->pos().y(), 0, height() - 1) - d3test.y();
 	}
 	else if (ev->buttons() & Qt::RightButton)
 	{
@@ -80,20 +86,12 @@ void ViewerWindow::mousePressEvent(QMouseEvent *ev)
 		QVector4D vec1 = matrix_mv_.inverted() * matrix_p_.inverted() * p1;
 		QVector4D vec2 = matrix_mv_.inverted() * matrix_p_.inverted() * p2;
 
-		QVector3D a;
-		QVector3D b;
-
-		a.setX(vec1.x() / vec1.w());
-		a.setY(vec1.y() / vec1.w());
-		a.setZ(vec1.z() / vec1.w());
-
-		b.setX(vec2.x() / vec2.w());
-		b.setY(vec2.y() / vec2.w());
-		b.setZ(vec2.z() / vec2.w());
+		QVector3D a = vec1.toVector3DAffine();
+		QVector3D b = vec2.toVector3DAffine();
 
 		auto pick_line = std::make_shared<LineSegment>(a, b);
 		pick_lines_.push_back(pick_line);
-		pick_line->init();
+		pick_line->init(Program);
 
 		for (auto shape : shapes_)
 		{
@@ -103,13 +101,60 @@ void ViewerWindow::mousePressEvent(QMouseEvent *ev)
 			}
 		}
 	}
+	else if (ev->buttons() & Qt::MiddleButton)
+	{
+		ox_ = getXnormalized(ev->pos().x(), 0, width() - 1);
+		oy_ = getYnormalized(ev->pos().y(), 0, height() - 1);
+	}
 }
 
 void ViewerWindow::mouseReleaseEvent(QMouseEvent *ev)
 {
-	if (ev->button() == Qt::LeftButton)
-	{
+// 	if (ev->button() == Qt::MidButton)
+// 	{
+// 		float x = getXnormalized(ev->pos().x(), 0, width() - 1);
+// 		float y = getYnormalized(ev->pos().y(), 0, height() - 1);
+// 
+// 		QMatrix4x4 matrix_trans_to_eye;
+// 		matrix_trans_to_eye.translate(0, 0, distance_);
+// 
+// 		QMatrix4x4 matrix_temp = matrix_p_ * matrix_trans_to_eye;
+// 
+// 		bool invertable = false;
+// 		QMatrix4x4 matrix_invert = matrix_temp.inverted(&invertable);
+// 
+// 		QVector4D offset = matrix_invert * QVector4D(x - ox_, y - oy_, 0, 1);
+// 		offset_ = QVector3D(offset.x() / offset.w(), offset.y() / offset.w(), offset.z() / offset.w());
+// 	}
 
+	if (ev->button() == Qt::MidButton)
+	{
+		QMatrix4x4 matrix_trans_to_eye;
+		matrix_trans_to_eye.translate(0, 0, distance_);
+		
+		QMatrix4x4 matrix_temp = matrix_p_ * matrix_trans_to_eye;
+
+		QVector4D d4test(0, 0, 0, 1);
+		d4test = matrix_temp * d4test;
+
+		QVector3D d3test = d4test.toVector3DAffine();
+		
+		bool invertable = false;
+		QMatrix4x4 matrix_invert = matrix_temp.inverted(&invertable);
+
+		float x = getXnormalized(ev->pos().x(), 0, width() - 1);
+		float y = getYnormalized(ev->pos().y(), 0, height() - 1);
+
+		QVector4D v1(ox_, oy_, d3test.z(), 1);
+		QVector4D v2(x, y, d3test.z(), 1);
+
+		QVector4D v1_o = matrix_invert * v1;
+		QVector4D v2_o = matrix_invert * v2;
+
+		QVector3D v1_3 = v1_o.toVector3DAffine();
+		QVector3D v2_3 = v2_o.toVector3DAffine();
+
+		offset_ += v2_3 - v1_3;
 	}
 }
 
@@ -126,6 +171,8 @@ void ViewerWindow::keyPressEvent(QKeyEvent *ev)
 
 		distance_ = -10.0;
 		pick_lines_.clear();
+
+		offset_ = QVector3D(0, 0, 0);
 	}
 }
 
@@ -146,8 +193,6 @@ void ViewerWindow::wheelEvent(QWheelEvent *ev)
 //! [4]
 void ViewerWindow::initialize()
 {
-	create_geometrys();
-
 	float texData[] = { 1.0, 0.0, 0.0, 1.0,
 						0.0, 1.0, 0.0, 1.0,
 						0.0, 0.0, 1.0, 1.0,
@@ -173,6 +218,9 @@ void ViewerWindow::initialize()
 	ShaderInfo si[] = { { GL_VERTEX_SHADER, "PointSprite.vert" },{ GL_FRAGMENT_SHADER, "PointSprite.frag" },{ GL_NONE, NULL } };
 	Program = LoadShaders(si);
 	glUseProgram(Program);
+
+	create_geometrys();
+
 	//glEnable(GL_POINT_SPRITE);
 	//glEnable(GL_PROGRAM_POINT_SIZE);
 
@@ -266,8 +314,34 @@ void ViewerWindow::create_geometrys()
 
 	for (auto shape : shapes_)
 	{
-		shape->init();
+		shape->init(Program);
 	}
+}
+
+void ViewerWindow::calc_mv()
+{
+	QMatrix4x4 matrix_trans_to_eye;
+	matrix_trans_to_eye.translate(0, 0, distance_);
+
+	QMatrix4x4 matrix_offset;
+	matrix_offset.translate(offset_);
+
+	QMatrix4x4 mat_rotate;
+	mat_rotate.rotate(rotate_);
+
+	// 	QMatrix4x4 matrix2;
+	// 	matrix2.translate(0, -1.57f, 0);
+
+	QMatrix4x4 matrix_trans_to_center;
+	matrix_trans_to_center.translate(center_);
+
+	QMatrix4x4 matrix_mv;
+	matrix_mv = matrix_trans_to_eye * matrix_offset * mat_rotate * matrix_trans_to_center;
+
+	//glUseProgram(Program);
+
+	//glUniformMatrix4fv(m_matrixUniform_mv, 1, GL_FALSE, matrix_mv.data());
+	matrix_mv_ = matrix_mv;
 }
 
 //! [5]
@@ -285,27 +359,7 @@ void ViewerWindow::render()
 	QMatrix4x4 rotate_self;
 	rotate_self.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
 
-	QMatrix4x4 matrix_trans_to_eye;
-	matrix_trans_to_eye.translate(0, 0, distance_);
-
-	//matrix_mv = matrix_mv * tempMatrix_;
-
-	QMatrix4x4 mat_rotate;
-	mat_rotate.rotate(rotate_);
-
-	// 	QMatrix4x4 matrix2;
-	// 	matrix2.translate(0, -1.57f, 0);
-
-	QMatrix4x4 matrix_trans_to_center;
-	matrix_trans_to_center.translate(center_);
-
-	QMatrix4x4 matrix_mv;
-	matrix_mv = matrix_trans_to_eye * mat_rotate * matrix_trans_to_center;
-
-	glUseProgram(Program);
-
-	glUniformMatrix4fv(m_matrixUniform_mv, 1, GL_FALSE, matrix_mv.data());
-	matrix_mv_ = matrix_mv;
+	calc_mv();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 

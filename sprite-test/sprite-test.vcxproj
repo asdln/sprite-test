@@ -21,6 +21,7 @@
     <ClCompile Include="PrimitiveSet.cpp" />
     <ClCompile Include="PrimitiveSetCollection.cpp" />
     <ClCompile Include="Pyramid.cpp" />
+    <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="teapot.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="ViewerWindow.cpp" />
@@ -41,6 +42,7 @@
     <ClInclude Include="PrimitiveSet.h" />
     <ClInclude Include="PrimitiveSetCollection.h" />
     <ClInclude Include="Pyramid.h" />
+    <ClInclude Include="Sprite.h" />
     <ClInclude Include="teapot.h" />
     <ClInclude Include="teapot_data.h" />
     <ClInclude Include="Triangle.h" />
