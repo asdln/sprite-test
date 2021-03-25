@@ -16,11 +16,17 @@ void ViewerWindow::resizeEvent(QResizeEvent * event)
 {
 	if (isInitialized())
 	{
+		glViewport(0, 0, width(), height());
+
 		QMatrix4x4 matrix_p;
 		matrix_p.perspective(45.0f, (float)width() / height(), 1.0f, 1000.0f);
-		glUniformMatrix4fv(m_matrixUniform_p, 1, GL_FALSE, matrix_p.data());
 		matrix_p_ = matrix_p;
-		glViewport(0, 0, width(), height());
+
+		glUseProgram(program_general);
+		glUniformMatrix4fv(m_matrixUniform_p, 1, GL_FALSE, matrix_p.data());
+
+		glUseProgram(program_sprite);
+		glUniformMatrix4fv(sprite_matrix_uniform_p, 1, GL_FALSE, matrix_p.data());
 	}
 }
 
@@ -29,7 +35,7 @@ void ViewerWindow::mouseMoveEvent(QMouseEvent *ev)
 	x0_ = x1_;
 	y0_ = y1_;
 
-	QVector4D d4test(0, 0, 0, 1);
+	QVector4D d4test(-center_, 1);
 	d4test = matrix_p_ * matrix_mv_ * d4test;
 
 	QVector3D d3test = d4test.toVector3DAffine();
@@ -64,7 +70,7 @@ void ViewerWindow::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->buttons() & Qt::LeftButton)
 	{
-		QVector4D d4test(0, 0, 0, 1);
+		QVector4D d4test(-center_, 1);
 		d4test = matrix_p_ * matrix_mv_ * d4test;
 
 		QVector3D d3test = d4test.toVector3DAffine();
@@ -91,7 +97,7 @@ void ViewerWindow::mousePressEvent(QMouseEvent *ev)
 
 		auto pick_line = std::make_shared<LineSegment>(a, b);
 		pick_lines_.push_back(pick_line);
-		pick_line->init(Program);
+		pick_line->init(program_general);
 
 		for (auto shape : shapes_)
 		{
@@ -110,23 +116,6 @@ void ViewerWindow::mousePressEvent(QMouseEvent *ev)
 
 void ViewerWindow::mouseReleaseEvent(QMouseEvent *ev)
 {
-// 	if (ev->button() == Qt::MidButton)
-// 	{
-// 		float x = getXnormalized(ev->pos().x(), 0, width() - 1);
-// 		float y = getYnormalized(ev->pos().y(), 0, height() - 1);
-// 
-// 		QMatrix4x4 matrix_trans_to_eye;
-// 		matrix_trans_to_eye.translate(0, 0, distance_);
-// 
-// 		QMatrix4x4 matrix_temp = matrix_p_ * matrix_trans_to_eye;
-// 
-// 		bool invertable = false;
-// 		QMatrix4x4 matrix_invert = matrix_temp.inverted(&invertable);
-// 
-// 		QVector4D offset = matrix_invert * QVector4D(x - ox_, y - oy_, 0, 1);
-// 		offset_ = QVector3D(offset.x() / offset.w(), offset.y() / offset.w(), offset.z() / offset.w());
-// 	}
-
 	if (ev->button() == Qt::MidButton)
 	{
 		QMatrix4x4 matrix_trans_to_eye;
@@ -190,6 +179,56 @@ void ViewerWindow::wheelEvent(QWheelEvent *ev)
 	}
 }
 
+void ViewerWindow::init_program1()
+{
+	ShaderInfo si[] = { { GL_VERTEX_SHADER, "general.vert" },{ GL_FRAGMENT_SHADER, "general.frag" },{ GL_NONE, NULL } };
+	program_general = LoadShaders(si);
+	glUseProgram(program_general);
+
+	//glEnable(GL_CULL_FACE);
+
+	vColorAttr_ = glGetUniformLocation(program_general, "vVertColor");
+	GLfloat colors[] = { 0.0, 0.0, 1.0, 1.0 };
+	glUniform4fv(vColorAttr_, 1, colors);
+
+	//glShadeModel(GL_SMOOTH);
+
+	//GLboolean res = 1;
+	//glGetBooleanv(GL_POINT_SPRITE, &res);
+
+	m_matrixUniform_mv = glGetUniformLocation(program_general, "matrix_mv");
+	m_matrixUniform_p = glGetUniformLocation(program_general, "matrix_p");
+	glUniformMatrix4fv(m_matrixUniform_p, 1, GL_FALSE, matrix_p_.data());
+
+	QVector4D Ambient = QVector4D(0.2f, 0.2f, 0.2f, 1.0f);
+	glUniform4fv(glGetUniformLocation(program_general, "Ambient"), 1, (const GLfloat*)&Ambient);
+
+	QVector3D LightColor(0.9, 0.9, 0.9);
+	QVector3D LightDirection(0.0, 0.0, -2.0);
+	LightDirection.normalize();
+	glUniform3fv(glGetUniformLocation(program_general, "LightColor"), 1, (const GLfloat*)&LightColor);
+	glUniform3fv(glGetUniformLocation(program_general, "LightDirection"), 1, (const GLfloat*)&LightDirection);
+
+	QVector3D Eye(0.0f, 0.0f, 0.0f);
+	QVector3D HalfVector = Eye - LightDirection;
+	HalfVector.normalize();
+
+	glUniform3fv(glGetUniformLocation(program_general, "HalfVector"), 1, (const GLfloat*)&HalfVector);
+	glUniform1f(glGetUniformLocation(program_general, "Shininess"), 5.0f);
+	glUniform1f(glGetUniformLocation(program_general, "Strength"), 0.9f);
+}
+
+void ViewerWindow::init_program2()
+{
+	ShaderInfo si[] = { { GL_VERTEX_SHADER, "PointSprite.vert" },{ GL_FRAGMENT_SHADER, "PointSprite.frag" },{ GL_NONE, NULL } };
+	program_sprite = LoadShaders(si);
+	glUseProgram(program_sprite);
+
+	sprite_matrix_uniform_mv = glGetUniformLocation(program_sprite, "matrix_mv");
+	sprite_matrix_uniform_p = glGetUniformLocation(program_sprite, "matrix_p");
+	glUniformMatrix4fv(sprite_matrix_uniform_p, 1, GL_FALSE, matrix_p_.data());
+}
+
 //! [4]
 void ViewerWindow::initialize()
 {
@@ -214,54 +253,18 @@ void ViewerWindow::initialize()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glClearColor(0.2f, 0.1f, 0.3f, 1.0f);
-
-	ShaderInfo si[] = { { GL_VERTEX_SHADER, "PointSprite.vert" },{ GL_FRAGMENT_SHADER, "PointSprite.frag" },{ GL_NONE, NULL } };
-	Program = LoadShaders(si);
-	glUseProgram(Program);
-
-	create_geometrys();
-
-	//glEnable(GL_POINT_SPRITE);
-	//glEnable(GL_PROGRAM_POINT_SIZE);
-
-	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
-	vColorAttr_ = glGetUniformLocation(Program, "vVertColor");
-	GLfloat colors[] = { 0.0, 0.0, 1.0, 1.0 };
-	glUniform4fv(vColorAttr_, 1, colors);
+	matrix_p_.perspective(45.0f, (float)width() / height(), 1.0f, 1000.0f);
 
-	//glShadeModel(GL_SMOOTH);
+	init_program1();
 
-	//GLboolean res = 1;
-	//glGetBooleanv(GL_POINT_SPRITE, &res);
+	glEnable(GL_POINT_SPRITE);
+	glEnable(GL_PROGRAM_POINT_SIZE);
 
-	m_posAttr = glGetAttribLocation(Program, "posAttr");
-	//m_colAttr = m_program->attributeLocation("colAttr");
-	m_matrixUniform_mv = glGetUniformLocation(Program, "matrix_mv");
-	m_matrixUniform_p = glGetUniformLocation(Program, "matrix_p");
+	init_program2();
 
-	QMatrix4x4 matrix_p;
-	matrix_p.perspective(45.0f, (float)width() / height(), 1.0f, 1000.0f);
-	glUniformMatrix4fv(m_matrixUniform_p, 1, GL_FALSE, matrix_p.data());
-	matrix_p_ = matrix_p;
-
-	QVector4D Ambient = QVector4D(0.2f, 0.2f, 0.2f, 1.0f);
-	glUniform4fv(glGetUniformLocation(Program, "Ambient"), 1, (const GLfloat*)&Ambient);
-
-	QVector3D LightColor(0.9, 0.9, 0.9);
-	QVector3D LightDirection(0.0, 0.0, -2.0);
-	LightDirection.normalize();
-	glUniform3fv(glGetUniformLocation(Program, "LightColor"), 1, (const GLfloat*)&LightColor);
-	glUniform3fv(glGetUniformLocation(Program, "LightDirection"), 1, (const GLfloat*)&LightDirection);
-
-	QVector3D Eye(0.0f, 0.0f, 0.0f);
-	QVector3D HalfVector = Eye - LightDirection;
-	HalfVector.normalize();
-
-	glUniform3fv(glGetUniformLocation(Program, "HalfVector"), 1, (const GLfloat*)&HalfVector);
-	glUniform1f(glGetUniformLocation(Program, "Shininess"), 5.0f);
-	glUniform1f(glGetUniformLocation(Program, "Strength"), 0.9f);
+	create_geometrys();
 
 	glViewport(0, 0, width(), height());
 }
@@ -314,8 +317,13 @@ void ViewerWindow::create_geometrys()
 
 	for (auto shape : shapes_)
 	{
-		shape->init(Program);
+		shape->init(program_general);
 	}
+
+	GLfloat points[] = { 1.0, 1.0, 1.0, -1.5, 1.0, -1.5 };
+
+	sprite_ = std::make_shared<Sprite>(points, 6);
+	sprite_->init(program_sprite);
 }
 
 void ViewerWindow::calc_mv()
@@ -363,6 +371,8 @@ void ViewerWindow::render()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+	glUseProgram(program_general);
+
 	GLfloat colors2[] = { 1.0, 0.0, 0.0, 1.0 };
 	glUniform4fv(vColorAttr_, 1, colors2);
 
@@ -393,6 +403,12 @@ void ViewerWindow::render()
 		
 		shape->draw(m_matrixUniform_mv, matrix_mv_);
 	}
+
+	QMatrix4x4 rotate_self2;
+	rotate_self2.rotate(-100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+
+	sprite_->set_matrix_front(rotate_self2);
+	sprite_->draw(sprite_matrix_uniform_mv, matrix_mv_);
 
 	//glBindVertexArray(vert);
 	//glUniform1i(0, 0);

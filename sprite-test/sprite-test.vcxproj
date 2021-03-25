@@ -30,6 +30,8 @@
     <QtMoc Include="openglwindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="general.frag" />
+    <None Include="general.vert" />
     <None Include="PointSprite.frag" />
     <None Include="PointSprite.vert" />
   </ItemGroup>

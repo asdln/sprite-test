@@ -18,6 +18,8 @@
 #include "Pyramid.h"
 #include "LineSegment.h"
 
+#include "Sprite.h"
+
 //! [1]
 class ViewerWindow : public OpenGLWindow
 {
@@ -41,6 +43,10 @@ public:
 	virtual void wheelEvent(QWheelEvent *ev);
 
 protected:
+
+	void init_program1();
+
+	void init_program2();
 
 	void create_geometrys();
 
@@ -73,15 +79,19 @@ protected:
 
 private:
 
-	GLuint Program = 0;
+	GLuint program_general = 0;
+	GLuint m_matrixUniform_mv;
+	GLuint m_matrixUniform_p;
 	GLuint vColorAttr_ = 0;
+
+	GLuint program_sprite = 0;
+	GLuint sprite_matrix_uniform_p = 0;
+	GLuint sprite_matrix_uniform_mv = 0;
 
 	GLuint tex;
 
-	GLuint m_posAttr;
-	GLuint m_colAttr;
-	GLuint m_matrixUniform_mv;
-	GLuint m_matrixUniform_p;
+
+	std::shared_ptr<Sprite> sprite_;
 
 	QMatrix4x4 matrix_mv_;
 	QMatrix4x4 matrix_p_;
