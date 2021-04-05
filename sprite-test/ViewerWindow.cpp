@@ -284,7 +284,7 @@ void ViewerWindow::create_geometrys()
 
 	auto plane_ = std::make_shared<Plane>();
 	shapes_.emplace_back(plane_);
- 	plane_->scale(12, 0, 12);
+ 	plane_->scale(12, 1, 12);
 
 	auto cube1_ = std::make_shared<Cube>();
 	shapes_.emplace_back(cube1_);
