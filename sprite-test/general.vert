@@ -8,13 +8,11 @@ uniform highp mat4 matrix_mv;
 uniform highp mat4 matrix_p;
 
 out vec3 Normal;
-out vec4 Pos;
 out vec4 Color;
 
 void main()
 {
-	Pos = matrix_mv * vPos;
-	gl_Position = matrix_p * Pos;
+	gl_Position = matrix_p * matrix_mv * vPos;
 	mat3 matNoral =  transpose(inverse(mat3(matrix_mv)));
 	Normal = normalize(matNoral * vVertNormal);
 	Color = vVertColor;
