@@ -28,5 +28,7 @@ void main()
         specular = pow(specular, Shininess);
     vec4 ReflectLight = vec4(LightColor*specular*Strength, 0.0);
 
-    fColor = min(color*Ambient+ReflectLight, vec4(1.0));
+    vec4 fColor1 = min(color*Ambient+ReflectLight, vec4(1.0));
+	fColor = min(vec4(diffuse, diffuse, diffuse, 1.0), vec4(1.0));
+	fColor = max(Ambient, fColor);
 }

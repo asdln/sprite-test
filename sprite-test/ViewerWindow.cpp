@@ -200,7 +200,7 @@ void ViewerWindow::init_program1()
 	m_matrixUniform_p = glGetUniformLocation(program_general, "matrix_p");
 	glUniformMatrix4fv(m_matrixUniform_p, 1, GL_FALSE, matrix_p_.data());
 
-	QVector4D Ambient = QVector4D(0.2f, 0.2f, 0.2f, 1.0f);
+	QVector4D Ambient = QVector4D(0.3f, 0.3f, 0.3f, 1.0f);
 	glUniform4fv(glGetUniformLocation(program_general, "Ambient"), 1, (const GLfloat*)&Ambient);
 
 	QVector3D LightColor(0.9, 0.9, 0.9);
